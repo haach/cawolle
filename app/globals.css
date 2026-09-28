@@ -1,0 +1,31 @@
+@import "../styles/tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+a {
+  color: var(--color-brand);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-tan);
+}

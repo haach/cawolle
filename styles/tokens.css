@@ -1,0 +1,73 @@
+:root {
+  /* Colors painted on https://cawolle.de. Unused theme colors are omitted. */
+  --color-text: #888888;
+  --color-text-muted: #a29e9a;
+  --color-text-subtle: #888d8f;
+  --color-text-inverse: #ffffff;
+  --color-brand: #660000;
+  --color-brand-dark: #440000;
+  --color-brand-deep: #330000;
+  --color-brand-hover: #7e0002;
+  --color-brand-active: #9a4848;
+  --color-brand-link-hover: #aa0000;
+  --color-tan: #d3aa7f;
+  --color-tan-hover: #e6d0ba;
+  --color-beige: #eae3db;
+  --color-beige-border: #a6a19b;
+  --color-background: #ffffff;
+  --color-input: #efebe6;
+  --color-input-border: #f0f3f5;
+  --color-input-border-focus: #e3e6e8;
+  --color-border: #cccccc;
+  --color-danger: #a94442;
+  --color-on-brand: #ffffff;
+  --color-on-brand-hover: #f5f5f5;
+
+  --font-family-base: var(--font-roboto-condensed), sans-serif;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-size-small: 14px;
+  --font-size-form: 16px;
+  --font-size-body: 18px;
+  --font-size-h6: 1em;
+  --font-size-h5: 1.25em;
+  --font-size-h4: 1.375em;
+  --font-size-h3: 1.75em;
+  --font-size-h2: 2.25em;
+  --font-size-h1: 3em;
+  --line-height-body: 28px;
+  --line-height-small: 20px;
+  --line-height-heading: 1.1;
+
+  --radius-sm: 5px;
+  --radius-pill: 50px;
+  --radius-full: 50%;
+
+  /* Spacing that appears as padding or margin on the live pages. */
+  --space-5: 5px;
+  --space-10: 10px;
+  --space-15: 15px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-30: 30px;
+  --space-40: 40px;
+  --space-50: 50px;
+  --space-55: 55px;
+  --space-60: 60px;
+  --space-70: 70px;
+  --space-75: 75px;
+  --space-80: 80px;
+
+  --shadow-nav: inset 0 -5px 5px rgb(41 6 6 / 0.5);
+  --shadow-nav-active: inset 0 -5px 5px rgb(71 22 22 / 0.5);
+  --shadow-footer: inset 0 10px 19px rgb(168 127 80 / 0.5);
+  --shadow-image: 0 6px 35px 5px rgb(207 207 207);
+  --shadow-button: 0 0 8px rgb(85 0 0 / 0.9);
+  --shadow-focus: 0 0 8px rgb(0 0 0 / 0.07);
+
+  --page-width: 1170px;
+}

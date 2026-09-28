@@ -1,0 +1,12 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  width: min(100% - var(--space-30), var(--page-width));
+  margin-inline: auto;
+  padding-block: var(--space-40);
+}

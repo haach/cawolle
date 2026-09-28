@@ -1,0 +1,94 @@
+.root {
+  margin: 0;
+  font-family: inherit;
+}
+
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-heading);
+}
+
+.h1 {
+  font-size: var(--font-size-h1);
+}
+
+.h2 {
+  font-size: var(--font-size-h2);
+}
+
+.h3 {
+  font-size: var(--font-size-h3);
+}
+
+.h4 {
+  font-size: var(--font-size-h4);
+}
+
+.h5 {
+  font-size: var(--font-size-h5);
+}
+
+.h6 {
+  font-size: var(--font-size-h6);
+}
+
+.body {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-body);
+}
+
+.small {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-light);
+  line-height: var(--line-height-small);
+}
+
+.color-default {
+  color: var(--color-text);
+}
+
+.color-brand {
+  color: var(--color-brand);
+}
+
+.color-muted {
+  color: var(--color-text-muted);
+}
+
+.color-inverse {
+  color: var(--color-text-inverse);
+}
+
+.weight-light {
+  font-weight: var(--font-weight-light);
+}
+
+.weight-regular {
+  font-weight: var(--font-weight-regular);
+}
+
+.weight-medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.weight-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+.weight-bold {
+  font-weight: var(--font-weight-bold);
+}
+
+.weight-extrabold {
+  font-weight: var(--font-weight-extrabold);
+}
+
+.italic {
+  font-style: italic;
+}
