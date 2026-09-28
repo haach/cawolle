@@ -24,8 +24,10 @@ body {
 a {
   color: var(--color-brand);
   text-decoration: none;
+  transition: color 220ms ease;
 }
 
-a:hover {
-  color: var(--color-tan);
+a:hover,
+a:focus-visible {
+  color: var(--color-brand-hover);
 }

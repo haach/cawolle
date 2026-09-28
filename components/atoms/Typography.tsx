@@ -37,7 +37,7 @@ type TypographyProps = {
   className?: string;
 };
 
-export function Typography({
+export const Typography: React.FC<TypographyProps> = ({
   variant = "body",
   as,
   color,
@@ -45,7 +45,7 @@ export function Typography({
   italic = false,
   children,
   className,
-}: TypographyProps) {
+}: TypographyProps) => {
   const Component = as ?? variantElement[variant];
   const classes = [
     styles.root,
@@ -59,4 +59,4 @@ export function Typography({
     .join(" ");
 
   return <Component className={classes}>{children}</Component>;
-}
+};

@@ -1,0 +1,12 @@
+.spacing {
+  display: flex;
+  gap: var(--spacing);
+}
+
+.col {
+  flex-direction: column;
+}
+
+.row {
+  flex-direction: row;
+}

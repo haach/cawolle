@@ -10,17 +10,15 @@ type ButtonProps = {
   children: ReactNode;
 } & Omit<ComponentProps<"button">, "children">;
 
-export function Button({
+export const Button: React.FC<ButtonProps> = ({
   variant = "solid",
   href,
   className,
   children,
   type = "button",
   ...props
-}: ButtonProps) {
-  const classes = [styles.button, styles[variant], className]
-    .filter(Boolean)
-    .join(" ");
+}: ButtonProps) => {
+  const classes = [styles.button, styles[variant], className].filter(Boolean).join(" ");
 
   if (href) {
     return (
@@ -35,4 +33,4 @@ export function Button({
       {children}
     </button>
   );
-}
+};

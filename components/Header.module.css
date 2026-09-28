@@ -13,8 +13,13 @@
 }
 
 .brand {
-  font-weight: var(--font-weight-semibold);
+  display: flex;
   text-decoration: none;
+}
+
+.logo {
+  width: auto;
+  height: 48px;
 }
 
 .nav {
@@ -23,4 +28,27 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.nav a {
+  position: relative;
+}
+
+.nav a::after {
+  position: absolute;
+  right: 0;
+  bottom: -4px;
+  left: 0;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--color-brand-active), var(--color-tan));
+  content: "";
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 220ms ease;
+}
+
+.nav a:hover::after,
+.nav a:focus-visible::after {
+  transform: scaleX(1);
 }

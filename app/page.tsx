@@ -1,5 +1,5 @@
-import { Typography } from "@/components/atoms/Typography";
+import { Hero } from "@/components/Hero";
 
 export default function HomePage() {
-  return <Typography variant="h1">Cawolle</Typography>;
+  return <Hero />;
 }
