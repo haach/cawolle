@@ -1,0 +1,17 @@
+.list {
+  width: 100%;
+}
+
+.viewport {
+  position: relative;
+  width: 100%;
+}
+
+.row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  gap: var(--space-16);
+  width: 100%;
+}

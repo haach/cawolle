@@ -1,0 +1,86 @@
+.back {
+  color: var(--color-brand);
+  font-size: var(--font-size-form);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+  gap: var(--space-40);
+  align-items: start;
+  margin-top: var(--space-20);
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-15);
+}
+
+.price {
+  margin: 0;
+  color: var(--color-brand);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading);
+}
+
+.condition {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.aspects {
+  display: grid;
+  gap: var(--space-10);
+  width: 100%;
+  margin: 0;
+}
+
+.aspects div {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.4fr) 1fr;
+  gap: var(--space-10);
+}
+
+.aspects dt {
+  margin: 0;
+  color: var(--color-brand);
+}
+
+.aspects dd {
+  margin: 0;
+  color: var(--color-text-high-contrast);
+}
+
+.description {
+  max-width: 46rem;
+  margin-top: var(--space-40);
+  color: var(--color-text-high-contrast);
+}
+
+.description p,
+.description ul,
+.description ol,
+.description h2,
+.description h3 {
+  margin: 0 0 var(--space-15);
+}
+
+.description a {
+  color: var(--color-brand);
+}
+
+.fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-15);
+}
+
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
