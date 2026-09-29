@@ -15,13 +15,37 @@ const robotoCondensed = Roboto_Condensed({
   variable: "--font-roboto-condensed",
 });
 
+const homeTitle = `${siteConfig.name} · Online-Wollgeschäft`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: siteConfig.name,
+    default: homeTitle,
     template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  openGraph: {
+    type: "website",
+    locale: "de_DE",
+    siteName: siteConfig.name,
+    title: homeTitle,
+    description: siteConfig.description,
+    url: siteConfig.url,
+    images: [
+      {
+        url: "/og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Hände stricken mit hellem Garn, daneben eine bordeauxrote Mütze und Wollknäuel.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: homeTitle,
+    description: siteConfig.description,
+    images: ["/og.jpg"],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

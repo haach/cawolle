@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button, Typography } from "@/components/atoms";
+import { JsonLd } from "@/components/JsonLd";
 import { PhotoGallery } from "@/components/shop/PhotoGallery";
+import { shareMetadata } from "@/lib/metadata";
+import { breadcrumb, offerDescription, product } from "@/lib/schema";
 import type { OfferDetail } from "@/lib/shop";
 import { EbayConfigError, EbayRequestError, getOffer } from "@/services/ebay";
 import styles from "./page.module.css";
@@ -13,9 +16,18 @@ export async function generateMetadata({ params }: OfferPageProps): Promise<Meta
   try {
     const { id } = await params;
     const offer = await getOffer(id);
-    return { title: offer.title, description: offer.title };
+    return shareMetadata({
+      title: offer.title,
+      description: offerDescription(offer),
+      path: `/shop/${encodeURIComponent(offer.id)}`,
+      image: offer.images[0],
+    });
   } catch {
-    return { title: "Angebot" };
+    return shareMetadata({
+      title: "Angebot",
+      description: "Dieses Angebot ist bei Cawolle gerade nicht verfügbar.",
+      path: "/shop",
+    });
   }
 }
 
@@ -58,8 +70,20 @@ export default async function OfferPage({ params }: OfferPageProps) {
     );
   }
 
+  const productSchema = product(offer);
+
   return (
     <article>
+      <JsonLd
+        data={[
+          ...(productSchema ? [productSchema] : []),
+          breadcrumb([
+            { name: "Startseite", path: "/" },
+            { name: "Shop", path: "/shop" },
+            { name: offer.title, path: `/shop/${encodeURIComponent(offer.id)}` },
+          ]),
+        ]}
+      />
       <Link href="/shop" className={styles.back}>
         Zurück zum Shop
       </Link>

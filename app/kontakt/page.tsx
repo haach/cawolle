@@ -1,15 +1,30 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { Spacing, Typography } from "@/components/atoms";
 import { ContactForm } from "@/components/ContactForm";
+import { JsonLd } from "@/components/JsonLd";
+import { shareMetadata } from "@/lib/metadata";
+import { breadcrumb, contactPage, organization } from "@/lib/schema";
+import { siteConfig } from "@/services/site";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "Kontakt",
-};
+  description: "Fragen zu Garn, Nadeln oder einer Bestellung? Schreiben Sie Cawolle direkt.",
+  path: "/kontakt",
+});
 
 export default function KontaktPage() {
   return (
     <Spacing>
+      <JsonLd
+        data={[
+          contactPage(),
+          organization({ email: true, sameAs: siteConfig.facebook }),
+          breadcrumb([
+            { name: "Startseite", path: "/" },
+            { name: "Kontakt", path: "/kontakt" },
+          ]),
+        ]}
+      />
       <Typography variant="h1">Kontakt</Typography>
       <div>
         <Typography variant="body">
@@ -18,7 +33,7 @@ export default function KontaktPage() {
         </Typography>
         <Spacing dir="row">
           <Link href="mailto:info@cawolle.de">info[at]cawolle.de</Link>
-          <Link href="https://www.facebook.com/Cawolle/" target="_blank" rel="noopener noreferrer">
+          <Link href={siteConfig.facebook} target="_blank" rel="noopener noreferrer">
             Facebook
           </Link>
         </Spacing>

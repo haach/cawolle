@@ -1,16 +1,29 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Typography } from "@/components/atoms";
+import { JsonLd } from "@/components/JsonLd";
 import { ShopBrowser } from "@/components/shop/ShopBrowser";
+import { shareMetadata } from "@/lib/metadata";
+import { breadcrumb, shopPage } from "@/lib/schema";
+import { siteConfig } from "@/services/site";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "Shop",
-  description: "Aktuelle Angebote von Cawolle. Bestellung und Zahlung laufen über eBay.",
-};
+  description: siteConfig.shopDescription,
+  path: "/shop",
+});
 
 export default function ShopPage() {
   return (
     <>
+      <JsonLd
+        data={[
+          shopPage(),
+          breadcrumb([
+            { name: "Startseite", path: "/" },
+            { name: "Shop", path: "/shop" },
+          ]),
+        ]}
+      />
       <Typography variant="h1">Shop</Typography>
       <Suspense fallback={<p>Angebote werden geladen …</p>}>
         <ShopBrowser />

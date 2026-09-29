@@ -1,7 +1,18 @@
 export const siteConfig = {
   name: "Cawolle",
-  description: "Cawolle",
+  description:
+    "Cawolle - ein Online-Wollgeschäft. Garne, Nadeln und Kurzwaren von Katia, Zitron, LANG YARNS, addi und weiteren Manufakturen.",
   url: "https://cawolle.de",
+  email: "info@cawolle.de",
+  facebook: "https://www.facebook.com/Cawolle/",
+  logo: "/logo.png",
+  shopDescription: "Aktuelle Angebote von Cawolle. Bestellung und Zahlung laufen über eBay.",
+  address: {
+    street: "Neue Str. 2",
+    postalCode: "63584",
+    locality: "Gründau",
+    country: "DE",
+  },
 } as const;
 
 export const mainNav = [

@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { Spacing, Typography } from "@/components/atoms";
+import { shareMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "Datenschutz",
   description:
     "Datenschutzerklärung der Cawolle: Kontaktformular, Server-Logfiles und Angebote, die wir von eBay abrufen und dorthin weiterleiten.",
-};
+  path: "/datenschutz",
+});
 
 export default function DatenschutzPage() {
   return (

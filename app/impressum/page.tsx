@@ -1,24 +1,30 @@
-import type { Metadata } from "next";
 import { Spacing, Typography } from "@/components/atoms";
 import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
+import { shareMetadata } from "@/lib/metadata";
+import { organization } from "@/lib/schema";
+import { siteConfig } from "@/services/site";
 
-export const metadata: Metadata = {
+export const metadata = shareMetadata({
   title: "Impressum",
-};
+  description: `Anbieterkennzeichnung von ${siteConfig.name}, Inhaberin Bettina Achenbach, ${siteConfig.address.street}, ${siteConfig.address.postalCode} ${siteConfig.address.locality}.`,
+  path: "/impressum",
+});
 
 export default function ImpressumPage() {
   return (
     <Spacing>
+      <JsonLd data={organization({ address: true, email: true })} />
       <Typography variant="h1">Impressum</Typography>
       <div>
         <Typography variant="body">
-          Cawolle
+          {siteConfig.name}
           <br />
           Inh. Bettina Achenbach
           <br />
-          Neue Str. 2 63584 Gründau
+          {siteConfig.address.street} {siteConfig.address.postalCode} {siteConfig.address.locality}
           <br />
-          E-Mail: info[at]cawolle.de
+          E-Mail: {siteConfig.email.replace("@", "[at]")}
         </Typography>
       </div>
       <div>

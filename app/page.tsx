@@ -1,18 +1,22 @@
-import type { Metadata } from "next";
 import { Hero } from "@/components/Hero";
+import { JsonLd } from "@/components/JsonLd";
 import { MoodBand } from "@/components/MoodBand";
 import { OnlineShop } from "@/components/OnlineShop";
 import { Sortiment } from "@/components/Sortiment";
+import { shareMetadata } from "@/lib/metadata";
+import { organization, website } from "@/lib/schema";
+import { siteConfig } from "@/services/site";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-  description:
-    "Cawolle ist jetzt ein Online-Wollgeschäft. Garne, Nadeln und Kurzwaren von Katia, Zitron, LANG YARNS, addi und weiteren Manufakturen.",
-};
+export const metadata = shareMetadata({
+  description: siteConfig.description,
+  path: "/",
+});
 
 export default function HomePage() {
   return (
     <div className={styles.page}>
+      <JsonLd data={[organization(), website()]} />
       <Hero />
       <OnlineShop />
       <MoodBand

@@ -30,6 +30,8 @@ export type OfferDetail = {
   id: string;
   title: string;
   price: string | null;
+  priceValue: string | null;
+  priceCurrency: string | null;
   condition: string | null;
   aspects: { name: string; value: string }[];
   images: string[];

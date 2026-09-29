@@ -175,9 +175,13 @@ async function ebayGet<T>(config: Config, path: string, retry = true): Promise<T
   return (await response.json()) as T;
 }
 
-function moneyLabel(money: Money | undefined) {
+function moneyOf(money: Money | undefined) {
   if (!money?.value || !money.currency) return null;
-  return formatPrice(money.value, money.currency);
+  return {
+    label: formatPrice(money.value, money.currency),
+    value: money.value,
+    currency: money.currency,
+  };
 }
 
 function escapeAspect(value: string) {
@@ -201,7 +205,7 @@ function toTeaser(item: Summary): OfferTeaser | null {
   return {
     id: item.itemId,
     title: item.title,
-    price: moneyLabel(item.price) ?? moneyLabel(item.currentBidPrice),
+    price: (moneyOf(item.price) ?? moneyOf(item.currentBidPrice))?.label ?? null,
     imageUrl: item.image?.imageUrl ? largeEbayImage(item.image.imageUrl) : null,
     condition: item.condition ?? null,
   };
@@ -338,10 +342,14 @@ export const getOffer = cache(async (id: string): Promise<OfferDetail> => {
     throw new EbayRequestError("Das Angebot gehört nicht zu diesem Shop.", 404);
   }
 
+  const money = moneyOf(item.price) ?? moneyOf(item.currentBidPrice);
+
   return {
     id: item.itemId,
     title: item.title,
-    price: moneyLabel(item.price) ?? moneyLabel(item.currentBidPrice),
+    price: money?.label ?? null,
+    priceValue: money?.value ?? null,
+    priceCurrency: money?.currency ?? null,
     condition: item.condition ?? null,
     aspects: (item.localizedAspects ?? [])
       .filter((aspect) => aspect.name && aspect.value)
