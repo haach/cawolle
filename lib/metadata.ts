@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { siteConfig } from "@/services/site";
 
 const homeTitle = `${siteConfig.name} · Online-Wollgeschäft`;
@@ -34,7 +35,7 @@ export function shareMetadata({
       siteName: siteConfig.name,
       title: pageTitle,
       description,
-      url: new URL(path, siteConfig.url).toString(),
+      url: path,
       images,
     },
     twitter: {
@@ -44,4 +45,49 @@ export function shareMetadata({
       images: images.map((item) => item.url),
     },
   };
+}
+
+export async function rootMetadata(): Promise<Metadata> {
+  return {
+    metadataBase: await requestMetadataBase(),
+    title: {
+      default: homeTitle,
+      template: `%s · ${siteConfig.name}`,
+    },
+    description: siteConfig.description,
+    openGraph: {
+      type: "website",
+      locale: "de_DE",
+      siteName: siteConfig.name,
+      title: homeTitle,
+      description: siteConfig.description,
+      url: "/",
+      images: [poster],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: homeTitle,
+      description: siteConfig.description,
+      images: [poster.url],
+    },
+  };
+}
+
+async function requestMetadataBase(): Promise<URL> {
+  const headerList = await headers();
+  const host = (headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "")
+    .split(",")[0]
+    ?.trim();
+
+  if (!host || !/^[A-Za-z0-9.-]+(?::\d+)?$/.test(host)) return new URL(siteConfig.url);
+
+  const forwardedProto = headerList.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const protocol =
+    forwardedProto === "http" || forwardedProto === "https"
+      ? forwardedProto
+      : host.startsWith("localhost") || host.startsWith("127.0.0.1")
+        ? "http"
+        : "https";
+
+  return new URL(`${protocol}://${host}`);
 }
