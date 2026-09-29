@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="de" className={robotoCondensed.variable}>
+    <html lang="de" className={robotoCondensed.variable} data-scroll-behavior="smooth">
       <body className={styles.body}>
         <Header />
         <main className={styles.main}>{children}</main>

@@ -2,10 +2,8 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  width: 100vw;
+  width: 100%;
   min-height: min(42vw, 720px);
-  margin-top: calc(-1 * var(--space-40));
-  margin-inline: calc(50% - 50vw);
   overflow: hidden;
   place-items: center;
 }
@@ -38,4 +36,12 @@
 
 .logo {
   display: block;
+  width: min(647px, 78vw);
+  height: auto;
+}
+
+@media (max-width: 700px) {
+  .hero {
+    min-height: 280px;
+  }
 }
