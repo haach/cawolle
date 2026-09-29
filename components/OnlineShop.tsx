@@ -22,11 +22,6 @@ export function OnlineShop() {
             Handarbeitszubehör, bequem nach Hause geliefert.
           </Typography>
           <Typography variant="body">
-            Die Lieblingswolle ist schon wieder aus, und die Fahrt nach Biebergemünd fällt aus? Wir
-            senden das Garn auf Anfrage direkt nach Hause. Versand 4,95 € bis 50 € Bestellwert,
-            darüber kostenfrei.
-          </Typography>
-          <Typography variant="body">
             Stöbern Sie in unserem <Link href="/shop">Shop</Link>, oder schreiben Sie uns, wenn Sie
             ein bestimmtes Garn, eine Nadelstärke oder Knöpfe zur Jacke suchen. Wir beraten Sie
             gerne bei Material und Modell.
