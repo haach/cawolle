@@ -125,8 +125,21 @@ async function getAccessToken(config: Config) {
     });
 
     if (!response.ok) {
+      const detail = await response.text();
+      let reason = "Prüfen Sie die Schlüssel in der Umgebung.";
+      try {
+        const body = JSON.parse(detail) as { error?: string; error_description?: string };
+        const description = body.error_description ?? "";
+        if (body.error === "unauthorized_client" || /grant type/i.test(description)) {
+          reason =
+            "Die Schlüssel sind gültig, aber der Zugriff ohne Nutzer-Anmeldung ist für diese Anwendung noch nicht freigeschaltet. Auf der eBay-Schlüsselseite beim Production-Keyset den Client-Credentials-Grant aktivieren.";
+        } else if (description) reason = description;
+        else if (body.error) reason = body.error;
+      } catch {
+        if (detail) reason = detail.slice(0, 180);
+      }
       throw new EbayRequestError(
-        "Die Anmeldung bei eBay ist fehlgeschlagen. Prüfen Sie die Schlüssel in der Umgebung.",
+        `Die Anmeldung bei eBay ist fehlgeschlagen. ${reason}`,
         response.status,
       );
     }
@@ -284,26 +297,79 @@ async function collectOffers(
   };
 }
 
+const defaultQueries = ["Garn", "Wolle", "Nadel", "Knopf", "Kurzwaren"];
+
+function mergeListings(listings: ShopListing[]): ShopListing {
+  const offers: ShopListing["offers"] = [];
+  const seen = new Set<string>();
+  for (const listing of listings) {
+    for (const offer of listing.offers) {
+      if (seen.has(offer.id)) continue;
+      seen.add(offer.id);
+      offers.push(offer);
+    }
+  }
+
+  const categories = new Map<string, ShopListing["refinements"]["categories"][number]>();
+  for (const listing of listings) {
+    for (const category of listing.refinements.categories) {
+      const current = categories.get(category.id);
+      if (!current || category.count > current.count) categories.set(category.id, category);
+    }
+  }
+
+  const aspects = new Map<string, Map<string, number>>();
+  for (const listing of listings) {
+    for (const aspect of listing.refinements.aspects) {
+      const values = aspects.get(aspect.name) ?? new Map<string, number>();
+      aspects.set(aspect.name, values);
+      for (const entry of aspect.values) {
+        values.set(entry.value, Math.max(values.get(entry.value) ?? 0, entry.count));
+      }
+    }
+  }
+
+  return {
+    offers,
+    refinements: {
+      categories: [...categories.values()],
+      aspects: [...aspects.entries()].map(([name, values]) => ({
+        name,
+        values: [...values.entries()].map(([value, count]) => ({ value, count })),
+      })),
+      categoryId:
+        listings.find((listing) => listing.refinements.categoryId)?.refinements.categoryId ?? null,
+    },
+  };
+}
+
 export async function searchOffers(input: {
   q: string;
   categoryId: string;
   aspects: Record<string, string[]>;
 }): Promise<ShopListing> {
   const config = requireConfig();
-
-  try {
-    return await collectOffers(config, input);
-  } catch (error) {
-    const needsKeyword =
-      !input.q.trim() &&
-      !input.categoryId &&
-      !config.searchQuery &&
-      error instanceof EbayRequestError &&
-      /parameter is required/i.test(error.message);
-
-    if (!needsKeyword) throw error;
-    return collectOffers(config, { ...input, q: "*" });
+  if (input.q.trim() || input.categoryId || config.searchQuery) {
+    return collectOffers(config, input);
   }
+
+  const listings: ShopListing[] = [];
+  let lastError: unknown;
+  for (const q of defaultQueries) {
+    try {
+      listings.push(await collectOffers(config, { ...input, q }));
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (listings.length === 0) {
+    throw lastError instanceof Error
+      ? lastError
+      : new EbayRequestError("Die Angebote konnten nicht geladen werden.", 502);
+  }
+
+  return mergeListings(listings);
 }
 
 function collectImages(item: ItemResponse) {
