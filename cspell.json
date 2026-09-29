@@ -2,7 +2,7 @@
   "version": "0.2",
   "language": "en,de",
   "import": ["@cspell/dict-de-de/cspell-ext.json"],
-  "words": ["cawolle", "esnext", "Gründau"],
+  "words": ["cawolle", "esnext", "Gründau", "kontakt"],
   "ignoreRegExpList": ["/href:\\s*[\"'][^\"']+[\"']/g"],
   "ignorePaths": ["node_modules", ".next", "archive", "package-lock.json", "*.tsbuildinfo"]
 }

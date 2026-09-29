@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Roboto_Condensed } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { siteConfig } from "@/lib/site";
+import { siteConfig } from "@/services/site";
 import "./globals.css";
 import styles from "./layout.module.css";
 

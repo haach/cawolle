@@ -1,6 +1,7 @@
 :root {
   /* Colors painted on https://cawolle.de. Unused theme colors are omitted. */
   --color-text: #888888;
+  --color-text-high-contrast: #333333;
   --color-text-muted: #a29e9a;
   --color-text-subtle: #888d8f;
   --color-text-inverse: #ffffff;
@@ -15,9 +16,9 @@
   --color-beige: #eae3db;
   --color-beige-border: #a6a19b;
   --color-background: #ffffff;
-  --color-input: #efebe6;
-  --color-input-border: #f0f3f5;
-  --color-input-border-focus: #e3e6e8;
+  --color-input: #f8f2eb;
+  --color-input-border: var(--color-tan-hover);
+  --color-input-border-focus: var(--color-tan);
   --color-border: #cccccc;
   --color-on-brand: #ffffff;
   --color-on-brand-hover: #f5f5f5;

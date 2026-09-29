@@ -11,7 +11,7 @@ type SpacingProps = {
 };
 
 export const Spacing: React.FC<SpacingProps> = ({
-  space = 20,
+  space = 30,
   dir = "col",
   children,
   className,

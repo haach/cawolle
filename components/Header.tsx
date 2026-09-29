@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { mainNav, siteConfig } from "@/lib/site";
+import { mainNav, siteConfig } from "@/services/site";
 import styles from "./Header.module.css";
 
 export function Header() {

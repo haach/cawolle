@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { siteConfig } from "@/lib/site";
+import { siteConfig } from "@/services/site";
 import styles from "./Hero.module.css";
 
 export function Hero() {

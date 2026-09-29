@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { footerNav, siteConfig } from "@/lib/site";
+import { footerNav, siteConfig } from "@/services/site";
 import styles from "./Footer.module.css";
 
 export function Footer() {

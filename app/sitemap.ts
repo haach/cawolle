@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { footerNav, mainNav, siteConfig } from "@/lib/site";
+import { footerNav, mainNav, siteConfig } from "@/services/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const paths = [...new Set([...mainNav, ...footerNav].map((item) => item.href))];
