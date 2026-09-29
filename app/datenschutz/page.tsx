@@ -111,6 +111,31 @@ export default function DatenschutzPage() {
       </div>
 
       <div>
+        <Typography variant="h2">Reichweitenmessung</Typography>
+        <Typography variant="body">
+          Wir werten mit Vercel Web Analytics aus, welche Seiten aufgerufen werden. Es werden keine
+          Cookies gesetzt. Besucher werden nur für einen Tag über einen Hash der Anfrage erkannt,
+          nicht über mehrere Tage oder Websites. Erfasst werden die aufgerufene Seite, die
+          verweisende Seite, ein ungefährer Standort sowie Gerät und Browser. Diese Angaben liegen
+          uns nur zusammengefasst vor.
+        </Typography>
+        <Typography variant="body">
+          Verarbeitet wird das durch die Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723,
+          USA. Rechtsgrundlage ist Artikel 6 Absatz 1 Buchstabe f DSGVO. Wir wollen sehen, welche
+          Seiten genutzt werden. Eine Übermittlung in die USA stützt Vercel auf den
+          Angemessenheitsbeschluss zum EU-US Data Privacy Framework. Hinweise stehen unter{" "}
+          <Link
+            href="https://vercel.com/docs/analytics/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            vercel.com/docs/analytics/privacy-policy
+          </Link>
+          .
+        </Typography>
+      </div>
+
+      <div>
         <Typography variant="h2">Cookies</Typography>
         <Typography variant="body">
           Diese Website setzt keine Cookies für Reichweitenmessung oder Werbung. Technisch nötige
