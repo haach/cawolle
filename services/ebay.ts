@@ -38,6 +38,7 @@ type Summary = {
 };
 
 type SearchPage = {
+  total?: number;
   itemSummaries?: Summary[];
   next?: string;
   refinement?: {
@@ -250,10 +251,26 @@ function refinementsFrom(page: SearchPage): ShopListing["refinements"] {
   };
 }
 
+function countedCategory(
+  refinements: ShopListing["refinements"],
+  categoryId: string,
+  total: number,
+): ShopListing["refinements"] {
+  if (!categoryId) return refinements;
+
+  return {
+    ...refinements,
+    categories: refinements.categories.map((category) =>
+      category.id === categoryId && category.count === 0 ? { ...category, count: total } : category,
+    ),
+  };
+}
+
 async function collectOffers(
   config: Config,
   input: { q: string; categoryId: string; aspects: Record<string, string[]> },
-): Promise<ShopListing> {
+  options?: { firstPageOnly?: boolean },
+): Promise<ShopListing & { total: number }> {
   const params = new URLSearchParams();
   const query = input.q.trim() || config.searchQuery;
   if (query) params.set("q", query);
@@ -269,12 +286,16 @@ async function collectOffers(
   const offers: ShopListing["offers"] = [];
   let path: string | null = `/buy/browse/v1/item_summary/search?${params.toString()}`;
   let refinements: ShopListing["refinements"] | null = null;
+  let total = 0;
   let pages = 0;
 
   while (path && offers.length < MAX_OFFERS && pages < 6) {
     pages += 1;
     const page: SearchPage = await ebayGet<SearchPage>(config, path);
-    if (!refinements) refinements = refinementsFrom(page);
+    if (!refinements) {
+      refinements = refinementsFrom(page);
+      total = page.total ?? 0;
+    }
 
     for (const item of page.itemSummaries ?? []) {
       const teaser = toTeaser(item);
@@ -282,7 +303,7 @@ async function collectOffers(
       if (offers.length >= MAX_OFFERS) break;
     }
 
-    if (!page.next) break;
+    if (options?.firstPageOnly || !page.next) break;
     const next = new URL(page.next);
     if (next.origin !== config.origin) break;
     path = `${next.pathname}${next.search}`;
@@ -290,6 +311,7 @@ async function collectOffers(
 
   return {
     offers,
+    total,
     refinements: refinements ?? { categories: [], aspects: [], categoryId: null },
   };
 }
@@ -346,8 +368,21 @@ export async function searchOffers(input: {
   aspects: Record<string, string[]>;
 }): Promise<ShopListing> {
   const config = requireConfig();
+  const hasAspects = Object.values(input.aspects).some((values) => values.length > 0);
   if (input.q.trim() || input.categoryId || config.searchQuery) {
-    return collectOffers(config, input);
+    const listing = await collectOffers(config, input);
+    if (!hasAspects) {
+      return {
+        offers: listing.offers,
+        refinements: countedCategory(listing.refinements, input.categoryId, listing.total),
+      };
+    }
+
+    const base = await collectOffers(config, { ...input, aspects: {} }, { firstPageOnly: true });
+    return {
+      offers: listing.offers,
+      refinements: countedCategory(base.refinements, input.categoryId, base.total),
+    };
   }
 
   const listings: ShopListing[] = [];

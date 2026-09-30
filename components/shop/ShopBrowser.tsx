@@ -130,6 +130,7 @@ export function ShopBrowser() {
           categories={listing?.refinements.categories ?? []}
           aspects={listing?.refinements.aspects ?? []}
           categoryId={categoryId}
+          dominantCategoryId={listing?.refinements.categoryId ?? ""}
           selected={selected}
           onCategory={setCategory}
           onToggle={toggleAspect}

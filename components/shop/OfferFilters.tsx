@@ -7,25 +7,27 @@ type OfferFiltersProps = {
   categories: CategoryRefinement[];
   aspects: AspectRefinement[];
   categoryId: string;
+  dominantCategoryId: string;
   selected: Record<string, string[]>;
   onCategory: (id: string) => void;
   onToggle: (name: string, value: string) => void;
 };
 
 export function OfferFilters({
-  categories,
   aspects,
   categoryId,
+  dominantCategoryId,
   selected,
-  onCategory,
   onToggle,
 }: OfferFiltersProps) {
   const panelId = useId();
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const activeCount =
-    (categoryId ? 1 : 0) + Object.values(selected).reduce((sum, values) => sum + values.length, 0);
+  const aspectCount = Object.values(selected).reduce((sum, values) => sum + values.length, 0);
+  const categoryWasChosen =
+    categoryId !== "" && !(aspectCount > 0 && categoryId === dominantCategoryId);
+  const activeCount = aspectCount + (categoryWasChosen ? 1 : 0);
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 800px)");
@@ -88,7 +90,7 @@ export function OfferFilters({
           </Button>
         </div>
         <div className={styles.drawerBody}>
-          {categories.length > 0 && (
+          {/* {categories.length > 0 && (
             <label className={styles.field}>
               <span className={styles.label}>Kategorie</span>
               <select
@@ -104,7 +106,7 @@ export function OfferFilters({
                 ))}
               </select>
             </label>
-          )}
+          )} */}
           {aspects.map((aspect) => (
             <fieldset key={aspect.name} className={styles.group}>
               <legend className={styles.label}>{aspect.name}</legend>
