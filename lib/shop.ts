@@ -86,43 +86,62 @@ const FILTER_ASPECTS = ["Material", "Farbe", "Marke", "Produktart", "Lauflänge"
 
 const filterAspectOrder = new Map(FILTER_ASPECTS.map((name, index) => [name, index]));
 
-const COLOR_ASPECT = "Farbe";
-
-// A Farbe value belongs to every group whose name it contains: Silbergrau → Grau, Pink-Blau → Pink and Blau.
-// Names in COLOR_ALIASES join that group even when the group name is not part of the value.
-const COLOR_GROUPS = [
-  "Apricot",
-  "Beige",
-  "Blau",
-  "Bordeaux",
-  "Braun",
-  "Cotto",
-  "Creme",
-  "Flieder",
-  "Gelb",
-  "Gold",
-  "Grau",
-  "Grün",
-  "Lila",
-  "Mint",
-  "Natur",
-  "Oliv",
-  "Orange",
-  "Petrol",
-  "Pink",
-  "Rosa",
-  "Rot",
-  "Schwarz",
-  "Türkis",
-  "Violett",
-  "Weiß",
-];
-
-const COLOR_ALIASES: Record<string, string> = {
-  Schlamm: "Braun",
+// A value belongs to every group whose name it contains: Silbergrau → Grau, Seide mit Baumwolle → Seide and Baumwolle.
+// Aliases join that group even when the group name is not part of the value.
+const ASPECT_GROUPS: Record<string, string[]> = {
+  Material: [
+    "Alpaca",
+    "Baumwolle",
+    "Cashmere",
+    "Leinen",
+    "Merino",
+    "Mohair",
+    "Polyacryl",
+    "Seide",
+    "Sockengarne",
+  ],
+  Farbe: [
+    "Apricot",
+    "Beige",
+    "Blau",
+    "Bordeaux",
+    "Braun",
+    "Cotto",
+    "Creme",
+    "Flieder",
+    "Gelb",
+    "Gold",
+    "Grau",
+    "Grün",
+    "Lila",
+    "Mint",
+    "Natur",
+    "Oliv",
+    "Orange",
+    "Petrol",
+    "Pink",
+    "Rosa",
+    "Rot",
+    "Schwarz",
+    "Türkis",
+    "Violett",
+    "Weiß",
+  ],
 };
 
-function normalizeColor(value: string) {
+const ASPECT_ALIASES: Record<string, Record<string, string>> = {
+  Material: {
+    Acryl: "Polyacryl",
+    Alpaka: "Alpaca",
+    Kaschmir: "Cashmere",
+    Sockengarn: "Sockengarne",
+  },
+  Farbe: {
+    Schlamm: "Braun",
+  },
+};
+
+function normalizeLabel(value: string) {
   return value
     .trim()
     .toLocaleLowerCase("de")
@@ -131,35 +150,37 @@ function normalizeColor(value: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-const normalizedColorGroups = COLOR_GROUPS.map((name) => ({
-  name,
-  normalized: normalizeColor(name),
-}));
+const normalizedAspectGroups = new Map(
+  Object.entries(ASPECT_GROUPS).map(([aspect, groups]) => [
+    aspect,
+    {
+      groups: groups.map((name) => ({ name, normalized: normalizeLabel(name) })),
+      aliases: Object.entries(ASPECT_ALIASES[aspect] ?? {}).map(([alias, group]) => ({
+        alias: normalizeLabel(alias),
+        group,
+      })),
+    },
+  ]),
+);
 
-const normalizedColorAliases = Object.entries(COLOR_ALIASES).map(([alias, group]) => ({
-  alias: normalizeColor(alias),
-  group,
-}));
+function groupedValues(aspectName: string, value: string) {
+  const grouping = normalizedAspectGroups.get(aspectName);
+  if (!grouping) return [value];
 
-function colorGroups(value: string) {
-  const normalized = normalizeColor(value);
+  const normalized = normalizeLabel(value);
   const matches = new Set(
-    normalizedColorGroups
+    grouping.groups
       .filter((group) => normalized.includes(group.normalized))
       .map((group) => group.name),
   );
-  for (const alias of normalizedColorAliases) {
+  for (const alias of grouping.aliases) {
     if (normalized.includes(alias.alias)) matches.add(alias.group);
   }
   return matches.size > 0 ? [...matches] : [value.trim()];
 }
 
-function sameColorGroup(group: string, selected: string) {
-  return normalizeColor(group) === normalizeColor(selected);
-}
-
-function refinementValues(name: string, value: string) {
-  return name === COLOR_ASPECT ? colorGroups(value) : [value];
+function sameGroup(group: string, selected: string) {
+  return normalizeLabel(group) === normalizeLabel(selected);
 }
 
 function recordRefinement(
@@ -182,7 +203,7 @@ export function aspectRefinements(offers: CatalogOffer[]): AspectRefinement[] {
     const seen = new Set<string>();
     for (const aspect of offer.aspects) {
       if (!filterAspectOrder.has(aspect.name)) continue;
-      for (const value of refinementValues(aspect.name, aspect.value)) {
+      for (const value of groupedValues(aspect.name, aspect.value)) {
         recordRefinement(aspects, seen, aspect.name, value);
       }
     }
@@ -221,8 +242,8 @@ export function matchesQuery(offer: CatalogOffer, query: string) {
 }
 
 function aspectValueMatches(name: string, aspectValue: string, selected: string) {
-  if (name !== COLOR_ASPECT) return aspectValue === selected;
-  return colorGroups(aspectValue).some((group) => sameColorGroup(group, selected));
+  if (!normalizedAspectGroups.has(name)) return aspectValue === selected;
+  return groupedValues(name, aspectValue).some((group) => sameGroup(group, selected));
 }
 
 export function offerMatches(offer: CatalogOffer, aspects: Record<string, string[]>) {
