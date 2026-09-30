@@ -1,4 +1,22 @@
+.slot {
+  min-width: 0;
+}
+
+.launcher,
+.backdrop,
+.backdropHidden,
+.drawerHeader,
+.drawerFooter {
+  display: none;
+}
+
 .filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20);
+}
+
+.drawerBody {
   display: flex;
   flex-direction: column;
   gap: var(--space-20);
@@ -61,4 +79,121 @@
 .option input {
   accent-color: var(--color-brand);
   margin-top: 3px;
+}
+
+.close,
+.done,
+.launcher {
+  border: 1px solid var(--color-brand-dark);
+  border-radius: var(--radius-sm);
+  background: var(--color-brand);
+  color: var(--color-on-brand);
+  font: inherit;
+  font-size: var(--font-size-form);
+  line-height: var(--line-height-small);
+  cursor: pointer;
+}
+
+.close,
+.done {
+  padding: var(--space-10) var(--space-20);
+}
+
+.done {
+  width: 100%;
+}
+
+.close:hover,
+.close:focus-visible,
+.done:hover,
+.done:focus-visible,
+.launcher:hover,
+.launcher:focus-visible {
+  background: var(--color-brand-hover);
+  border-color: var(--color-input-border-focus);
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.drawerTitle {
+  margin: 0;
+  color: var(--color-brand);
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-heading);
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--color-on-brand);
+  color: var(--color-brand);
+  font-size: var(--font-size-small);
+  line-height: 1.4;
+}
+
+@media (max-width: 800px) {
+  .launcher {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--space-15) var(--space-20);
+  }
+
+  .filters {
+    display: none;
+  }
+
+  .open {
+    position: fixed;
+    z-index: 30;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-height: min(85dvh, 720px);
+    border-radius: 16px 16px 0 0;
+    background: var(--color-background);
+    box-shadow: 0 -8px 30px rgb(51 0 0 / 0.18);
+  }
+
+  .open .drawerHeader,
+  .open .drawerFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-15);
+    padding: var(--space-15) var(--space-20);
+  }
+
+  .open .drawerHeader {
+    border-bottom: 1px solid var(--color-tan-hover);
+  }
+
+  .open .drawerFooter {
+    border-top: 1px solid var(--color-tan-hover);
+  }
+
+  .open .drawerBody {
+    overflow: auto;
+    padding: var(--space-20);
+  }
+
+  .backdrop {
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    display: block;
+    border: 0;
+    padding: 0;
+    background: rgb(0 0 0 / 0.45);
+    cursor: pointer;
+  }
 }
