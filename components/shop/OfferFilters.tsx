@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { AspectRefinement } from "@/lib/shop";
 import styles from "./OfferFilters.module.css";
-import { Button, Typography } from "../atoms";
+import { Typography } from "../atoms";
 
 type OfferFiltersProps = {
   aspects: AspectRefinement[];
@@ -9,6 +9,7 @@ type OfferFiltersProps = {
   dominantCategoryId: string;
   selected: Record<string, string[]>;
   onToggle: (name: string, value: string) => void;
+  onReset: () => void;
 };
 
 export function OfferFilters({
@@ -17,6 +18,7 @@ export function OfferFilters({
   dominantCategoryId,
   selected,
   onToggle,
+  onReset,
 }: OfferFiltersProps) {
   const panelId = useId();
   const titleId = useId();
@@ -29,45 +31,45 @@ export function OfferFilters({
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 800px)");
-    const closeOnDesktop = () => {
+    const closeDrawer = () => {
       if (!query.matches) setOpen(false);
     };
-    query.addEventListener("change", closeOnDesktop);
-    return () => query.removeEventListener("change", closeOnDesktop);
+    query.addEventListener("change", closeDrawer);
+    return () => query.removeEventListener("change", closeDrawer);
   }, []);
 
   useEffect(() => {
     if (!open) return;
 
     closeRef.current?.focus();
-    const html = document.documentElement;
-    const previousOverflow = html.style.overflow;
-    html.style.overflow = "hidden";
-
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
     document.addEventListener("keydown", onKey);
-
-    return () => {
-      html.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", onKey);
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
   return (
     <div className={styles.slot}>
-      <Button
-        type="button"
-        className={styles.launcher}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => setOpen(true)}
-      >
-        <span>Filter anzeigen</span>
-        {activeCount > 0 && <span className={styles.count}>{activeCount}</span>}
-      </Button>
+      <div className={styles.toolbar}>
+        <button
+          type="button"
+          className={`${styles.textButton} ${styles.showButton}`}
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpen(true)}
+        >
+          Filter anzeigen ({activeCount})
+        </button>
+        <button
+          type="button"
+          className={`${styles.textButton} ${styles.reset}`}
+          onClick={onReset}
+          disabled={activeCount === 0}
+        >
+          Alle filter zurücksetzen
+        </button>
+      </div>
       <button
         type="button"
         className={open ? styles.backdrop : styles.backdropHidden}
@@ -83,29 +85,20 @@ export function OfferFilters({
         aria-labelledby={open ? titleId : undefined}
       >
         <div className={styles.drawerHeader}>
-          <Typography variant="h2">Filter</Typography>
-          <Button ref={closeRef} type="button" onClick={() => setOpen(false)}>
-            Schließen
-          </Button>
+          <div id={titleId}>
+            <Typography variant="h2">Filter</Typography>
+          </div>
+          <button
+            ref={closeRef}
+            type="button"
+            className={styles.close}
+            aria-label="Filter schließen"
+            onClick={() => setOpen(false)}
+          >
+            ×
+          </button>
         </div>
         <div className={styles.drawerBody}>
-          {/* {categories.length > 0 && (
-            <label className={styles.field}>
-              <span className={styles.label}>Kategorie</span>
-              <select
-                className={styles.control}
-                value={categoryId}
-                onChange={(event) => onCategory(event.target.value)}
-              >
-                <option value="">Alle Kategorien</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name} ({category.count})
-                  </option>
-                ))}
-              </select>
-            </label>
-          )} */}
           {aspects.map((aspect) => (
             <fieldset key={aspect.name} className={styles.group}>
               <legend className={styles.label}>{aspect.name}</legend>

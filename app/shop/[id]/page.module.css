@@ -40,8 +40,14 @@
 
 .aspects div {
   display: grid;
-  grid-template-columns: minmax(90px, 0.4fr) 1fr;
+  grid-template-columns: minmax(140px, 0.5fr) 1fr;
   gap: var(--space-10);
+
+  @media (min-width: 0px) and (max-width: 320px) {
+    grid-template-columns: 1fr;
+    padding-bottom: var(--space-10);
+    gap: 0;
+  }
 }
 
 .aspects dt {

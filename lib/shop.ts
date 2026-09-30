@@ -83,15 +83,7 @@ export function categoryRefinements(offers: CatalogOffer[]): CategoryRefinement[
   );
 }
 
-const FILTER_ASPECTS = [
-  "Farbe",
-  "Form",
-  "Lauflänge",
-  "Marke",
-  "Material",
-  "Produktart",
-  "Stil",
-];
+const FILTER_ASPECTS = ["Material", "Farbe", "Marke", "Produktart", "Lauflänge", "Stil", "Form"];
 
 const filterAspectOrder = new Map(FILTER_ASPECTS.map((name, index) => [name, index]));
 

@@ -30,6 +30,13 @@ export function ShopBrowser({ offers }: { offers: CatalogOffer[] }) {
     router.replace(serialized ? `${pathname}?${serialized}` : pathname, { scroll: false });
   }
 
+  function resetFilters() {
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete("aspect");
+    next.delete("category");
+    replace(next);
+  }
+
   function toggleAspect(name: string, value: string) {
     const next = new URLSearchParams(searchParams.toString());
     const current = parseAspectParams(next);
@@ -62,6 +69,7 @@ export function ShopBrowser({ offers }: { offers: CatalogOffer[] }) {
           dominantCategoryId=""
           selected={selected}
           onToggle={toggleAspect}
+          onReset={resetFilters}
         />
       )}
       <div className={styles.results}>
