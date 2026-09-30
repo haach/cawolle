@@ -22,21 +22,6 @@ export type AspectRefinement = {
   values: { value: string; count: number }[];
 };
 
-export type CategoryRefinement = {
-  id: string;
-  name: string;
-  count: number;
-};
-
-export type ShopListing = {
-  offers: OfferTeaser[];
-  refinements: {
-    categories: CategoryRefinement[];
-    aspects: AspectRefinement[];
-    categoryId: string | null;
-  };
-};
-
 export type OfferDetail = {
   id: string;
   title: string;
@@ -65,22 +50,36 @@ export function parseAspectParams(params: URLSearchParams): Record<string, strin
   return aspects;
 }
 
-export function categoryRefinements(offers: CatalogOffer[]): CategoryRefinement[] {
-  const categories = new Map<string, CategoryRefinement>();
-  for (const offer of offers) {
-    if (!offer.categoryId || !offer.categoryName) continue;
-    const current = categories.get(offer.categoryId);
-    if (current) current.count += 1;
-    else
-      categories.set(offer.categoryId, {
-        id: offer.categoryId,
-        name: offer.categoryName,
-        count: 1,
-      });
+export function withQuery(params: URLSearchParams, value: string) {
+  const next = new URLSearchParams(params);
+  if (value) next.set("q", value);
+  else next.delete("q");
+  return next;
+}
+
+export function withoutAspects(params: URLSearchParams) {
+  const next = new URLSearchParams(params);
+  next.delete("aspect");
+  return next;
+}
+
+export function withToggledAspect(params: URLSearchParams, name: string, value: string) {
+  const current = parseAspectParams(params);
+  const values = current[name] ?? [];
+  const nextValues = values.includes(value)
+    ? values.filter((entry) => entry !== value)
+    : [...values, value];
+  const selected = { ...current, [name]: nextValues };
+  const next = new URLSearchParams(params);
+  next.delete("aspect");
+
+  for (const [aspectName, aspectValues] of Object.entries(selected)) {
+    for (const aspectValue of aspectValues) {
+      next.append("aspect", `${aspectName}:${aspectValue}`);
+    }
   }
-  return [...categories.values()].sort(
-    (a, b) => b.count - a.count || a.name.localeCompare(b.name, "de"),
-  );
+
+  return next;
 }
 
 const FILTER_ASPECTS = ["Material", "Farbe", "Marke", "Produktart", "Lauflänge", "Stil", "Form"];
@@ -134,12 +133,7 @@ export function matchesQuery(offer: CatalogOffer, query: string) {
   return tokens.every((token) => haystack.includes(token));
 }
 
-export function offerMatches(
-  offer: CatalogOffer,
-  categoryId: string,
-  aspects: Record<string, string[]>,
-) {
-  if (categoryId && offer.categoryId !== categoryId) return false;
+export function offerMatches(offer: CatalogOffer, aspects: Record<string, string[]>) {
   return Object.entries(aspects).every(([name, values]) => {
     if (values.length === 0) return true;
     return values.some((value) =>

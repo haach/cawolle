@@ -1,4 +1,5 @@
-import type { ElementType, ReactNode } from "react";
+import type { ElementType, FC, ReactNode } from "react";
+import { cn } from "@/lib/cn";
 import styles from "./Typography.module.css";
 
 const variantElement = {
@@ -37,7 +38,7 @@ type TypographyProps = {
   className?: string;
 };
 
-export const Typography: React.FC<TypographyProps> = ({
+export const Typography: FC<TypographyProps> = ({
   variant = "body",
   as,
   color,
@@ -45,18 +46,16 @@ export const Typography: React.FC<TypographyProps> = ({
   italic = false,
   children,
   className,
-}: TypographyProps) => {
+}) => {
   const Component = as ?? variantElement[variant];
-  const classes = [
+  const classes = cn(
     styles.root,
     styles[variant],
     styles[`color-${color ?? defaultColor[variant]}`],
-    weight ? styles[`weight-${weight}`] : "",
-    italic ? styles.italic : "",
-    className ?? "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+    weight && styles[`weight-${weight}`],
+    italic && styles.italic,
+    className,
+  );
 
   return <Component className={classes}>{children}</Component>;
 };

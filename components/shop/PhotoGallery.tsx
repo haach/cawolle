@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, type FC } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
@@ -13,7 +13,7 @@ type PhotoGalleryProps = {
   title: string;
 };
 
-export function PhotoGallery({ images, title }: PhotoGalleryProps) {
+export const PhotoGallery: FC<PhotoGalleryProps> = ({ images, title }) => {
   const [active, setActive] = useState(0);
   const [openAt, setOpenAt] = useState(-1);
   const current = images[active] ?? images[0];
@@ -56,4 +56,4 @@ export function PhotoGallery({ images, title }: PhotoGalleryProps) {
       />
     </div>
   );
-}
+};

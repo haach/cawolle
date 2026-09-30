@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import type { FC, ReactNode } from "react";
+import { cn } from "@/lib/cn";
 import styles from "./Alert.module.css";
 import { Typography } from "./Typography";
 import { Spacing } from "./Spacing";
@@ -14,13 +15,8 @@ type AlertProps = {
 
 const politeVariants = new Set<Variant>(["success", "info"]);
 
-export const Alert: React.FC<AlertProps> = ({
-  variant = "info",
-  title,
-  children,
-  className,
-}: AlertProps) => {
-  const classes = [styles.alert, styles[variant], className].filter(Boolean).join(" ");
+export const Alert: FC<AlertProps> = ({ variant = "info", title, children, className }) => {
+  const classes = cn(styles.alert, styles[variant], className);
   const polite = politeVariants.has(variant);
 
   if (polite) {

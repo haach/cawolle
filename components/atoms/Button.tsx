@@ -1,5 +1,7 @@
 import Link from "next/link";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, FC, ReactNode } from "react";
+import { cn } from "@/lib/cn";
+import { ExternalLink } from "./ExternalLink";
 import styles from "./Button.module.css";
 
 type Variant = "solid" | "pill";
@@ -10,22 +12,22 @@ type ButtonProps = {
   children: ReactNode;
 } & Omit<ComponentProps<"button">, "children">;
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button: FC<ButtonProps> = ({
   variant = "pill",
   href,
   className,
   children,
   type = "button",
   ...props
-}: ButtonProps) => {
-  const classes = [styles.button, styles[variant], className].filter(Boolean).join(" ");
+}) => {
+  const classes = cn(styles.button, styles[variant], className);
 
   if (href) {
     if (href.startsWith("http://") || href.startsWith("https://")) {
       return (
-        <a href={href} className={classes} target="_blank" rel="noopener noreferrer">
+        <ExternalLink href={href} className={classes}>
           {children}
-        </a>
+        </ExternalLink>
       );
     }
 

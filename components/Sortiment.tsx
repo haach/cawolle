@@ -1,10 +1,19 @@
 import Image from "next/image";
-import { Button, Typography } from "@/components/atoms";
+import type { FC } from "react";
+import { Button, ExternalLink, Typography } from "@/components/atoms";
 import { Section } from "@/components/Section";
 import { producers } from "@/services/producers";
 import styles from "./Sortiment.module.css";
 
-const sections = [
+type SortimentSection = {
+  id: "wolle" | "nadeln" | "kurzwaren";
+  title: string;
+  tone: "beige" | "plain";
+  paragraphs: string[];
+  cta?: { href: string; label: string };
+};
+
+const sections: SortimentSection[] = [
   {
     id: "wolle",
     title: "Wolle",
@@ -30,45 +39,42 @@ const sections = [
     paragraphs: [
       "Gütermann Nähgarn, Stickgarn von Anchor und Knöpfe von dill. Seit 1924 entsteht in der Knopfstadt Bärnau eine Mischung aus klassischen und modernen Knöpfen, passend zu Jacke, Mantel und selbstgestrickten Stücken.",
     ],
+    cta: { href: "/shop", label: "Zum Shop" },
   },
-] as const;
+];
 
-export function Sortiment() {
-  return (
-    <div id="sortiment">
-      {sections.map((section) => (
-        <Section key={section.id} id={section.id} title={section.title} tone={section.tone}>
-          {section.paragraphs.map((paragraph) => (
-            <Typography key={paragraph} variant="body" className={styles.copy}>
-              {paragraph}
-            </Typography>
-          ))}
-          <ul className={styles.logos}>
-            {producers
-              .filter((producer) => producer.category === section.id)
-              .map((producer) => (
-                <li key={producer.name}>
-                  <a
-                    className={styles.tile}
-                    href={producer.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${producer.name}, Website des Herstellers`}
-                  >
-                    <Image
-                      src={producer.logo}
-                      alt=""
-                      width={160}
-                      height={91}
-                      className={styles.logo}
-                    />
-                  </a>
-                </li>
-              ))}
-          </ul>
-          {section.id === "kurzwaren" ? <Button href="/shop">Zum Shop</Button> : null}
-        </Section>
-      ))}
-    </div>
-  );
-}
+export const Sortiment: FC = () => (
+  <div id="sortiment">
+    {sections.map((section) => (
+      <Section key={section.id} id={section.id} title={section.title} tone={section.tone}>
+        {section.paragraphs.map((paragraph) => (
+          <Typography key={paragraph} variant="body" className={styles.copy}>
+            {paragraph}
+          </Typography>
+        ))}
+        <ul className={styles.logos}>
+          {producers
+            .filter((producer) => producer.category === section.id)
+            .map((producer) => (
+              <li key={producer.name}>
+                <ExternalLink
+                  className={styles.tile}
+                  href={producer.href}
+                  aria-label={`${producer.name}, Website des Herstellers`}
+                >
+                  <Image
+                    src={producer.logo}
+                    alt=""
+                    width={160}
+                    height={91}
+                    className={styles.logo}
+                  />
+                </ExternalLink>
+              </li>
+            ))}
+        </ul>
+        {section.cta ? <Button href={section.cta.href}>{section.cta.label}</Button> : null}
+      </Section>
+    ))}
+  </div>
+);

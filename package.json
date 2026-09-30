@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "tsx scripts/sync-shop.ts || { test -f data/shop/catalog.json && echo 'Vorhandener Shop-Katalog wird verwendet.' || exit 1; }; next dev",
-    "sync-shop": "tsx scripts/sync-shop.ts",
-    "prebuild": "tsx scripts/sync-shop.ts",
+    "dev": "node --env-file-if-exists=.env --import tsx scripts/sync-shop.ts || { test -f data/shop/catalog.json && echo 'Vorhandener Shop-Katalog wird verwendet.' || exit 1; }; next dev",
+    "sync-shop": "node --env-file-if-exists=.env --import tsx scripts/sync-shop.ts",
+    "prebuild": "node --env-file-if-exists=.env --import tsx scripts/sync-shop.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
-    "@tanstack/react-virtual": "^3.14.13",
     "@vercel/analytics": "^2.0.1",
+    "fast-xml-parser": "^5.11.2",
     "next": "16.3.6",
     "nodemailer": "^10.0.12",
     "react": "19.2.8",

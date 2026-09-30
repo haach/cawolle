@@ -1,4 +1,5 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, FC, ReactNode } from "react";
+import { cn } from "@/lib/cn";
 import styles from "./Spacing.module.css";
 
 type Space = 5 | 10 | 15 | 16 | 20 | 30 | 40 | 50 | 55 | 60 | 70 | 75 | 80;
@@ -10,15 +11,10 @@ type SpacingProps = {
   className?: string;
 };
 
-export const Spacing: React.FC<SpacingProps> = ({
-  space = 30,
-  dir = "col",
-  children,
-  className,
-}: SpacingProps) => {
+export const Spacing: FC<SpacingProps> = ({ space = 30, dir = "col", children, className }) => {
   return (
     <div
-      className={[styles.spacing, styles[dir], className].filter(Boolean).join(" ")}
+      className={cn(styles.spacing, styles[dir], className)}
       style={{ "--spacing": `var(--space-${space})` } as CSSProperties}
     >
       {children}

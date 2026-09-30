@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useActionState, useEffect, startTransition, type SubmitEvent } from "react";
-import { useForm, type UseFormRegisterReturn } from "react-hook-form";
+import { useActionState, startTransition, type FC, type SubmitEvent } from "react";
+import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import { sendContactMessage, type ContactFormState } from "@/app/kontakt/actions";
 import { Alert, Button } from "@/components/atoms";
 import {
@@ -20,38 +20,47 @@ const fields: {
   label: string;
   type: "text" | "email" | "tel";
   placeholder: string;
+  autoComplete?: string;
 }[] = [
-  { name: "name", label: "Ihr Name", type: "text", placeholder: "Jana Mustermann" },
+  {
+    name: "name",
+    label: "Ihr Name",
+    type: "text",
+    placeholder: "Jana Mustermann",
+    autoComplete: "name",
+  },
   {
     name: "email",
     label: "Ihre E-Mail Adresse",
     type: "email",
     placeholder: "jana.mustermann@example.com",
+    autoComplete: "email",
   },
-  { name: "phone", label: "Ihre Telefonnummer", type: "tel", placeholder: "+49 170 12345678" },
+  {
+    name: "phone",
+    label: "Ihre Telefonnummer",
+    type: "tel",
+    placeholder: "+49 170 12345678",
+    autoComplete: "tel",
+  },
   { name: "subject", label: "Betreff", type: "text", placeholder: "Anfrage" },
 ];
 
-export const ContactForm: React.FC = () => {
+export const ContactForm: FC = () => {
   const [state, formAction, pending] = useActionState(sendContactMessage, initialState);
   const {
     register,
     handleSubmit,
-    setError,
-    formState: { errors, isSubmitted },
+    control,
+    formState: { errors, dirtyFields },
   } = useForm<ContactMessage>({
     resolver: zodResolver(contactSchema),
     reValidateMode: "onChange",
   });
+  const currentValues = useWatch({ control });
 
-  useEffect(() => {
-    if (state.status !== "error" || !state.fieldErrors) return;
-
-    for (const field of contactFieldNames) {
-      const message = state.fieldErrors[field];
-      if (message) setError(field, { message });
-    }
-  }, [state, setError]);
+  const messageFor = (field: ContactField) =>
+    fieldMessage(field, errors[field]?.message, state, currentValues[field], dirtyFields[field]);
 
   const onSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     const formData = new FormData(event.currentTarget);
@@ -77,9 +86,7 @@ export const ContactForm: React.FC = () => {
     );
   }
 
-  const hasFieldErrors = contactFieldNames.some(
-    (field) => errors[field] ?? (!isSubmitted && state.fieldErrors?.[field]),
-  );
+  const hasFieldErrors = contactFieldNames.some((field) => messageFor(field));
 
   return (
     <form className={styles.form} action={formAction} onSubmit={onSubmit} noValidate>
@@ -98,8 +105,8 @@ export const ContactForm: React.FC = () => {
               label={field.label}
               placeholder={field.placeholder}
               type={field.type}
-              error={fieldError(field.name, errors[field.name]?.message, state, isSubmitted)}
-              autoComplete={autoCompleteFor(field.name)}
+              error={messageFor(field.name)}
+              autoComplete={field.autoComplete}
               registration={register(field.name)}
             />
           ))}
@@ -109,7 +116,7 @@ export const ContactForm: React.FC = () => {
             id="message"
             label="Ihre Nachricht"
             placeholder="Ihre Nachricht"
-            error={fieldError("message", errors.message?.message, state, isSubmitted)}
+            error={messageFor("message")}
             registration={register("message")}
             multiline
           />
@@ -125,20 +132,19 @@ export const ContactForm: React.FC = () => {
   );
 };
 
-function fieldError(
+function fieldMessage(
   field: ContactField,
   clientMessage: string | undefined,
   state: ContactFormState,
-  isSubmitted: boolean,
+  current: string | undefined,
+  dirty: boolean | undefined,
 ): string | undefined {
-  return clientMessage ?? (isSubmitted ? undefined : state.fieldErrors?.[field]);
-}
-
-function autoCompleteFor(field: ContactField): string | undefined {
-  if (field === "name") return "name";
-  if (field === "email") return "email";
-  if (field === "phone") return "tel";
-  return undefined;
+  if (clientMessage) return clientMessage;
+  const serverMessage = state.fieldErrors?.[field];
+  if (!serverMessage) return undefined;
+  const submitted = state.values?.[field];
+  if (dirty && submitted !== undefined && current !== submitted) return undefined;
+  return serverMessage;
 }
 
 type FieldProps = {
@@ -152,7 +158,7 @@ type FieldProps = {
   multiline?: boolean;
 };
 
-const Field: React.FC<FieldProps> = ({
+const Field: FC<FieldProps> = ({
   id,
   label,
   error,
@@ -160,7 +166,7 @@ const Field: React.FC<FieldProps> = ({
   type = "text",
   autoComplete,
   multiline = false,
-}: FieldProps) => {
+}) => {
   const errorId = `${id}-error`;
   const describedBy = error ? errorId : undefined;
   const controlProps = {

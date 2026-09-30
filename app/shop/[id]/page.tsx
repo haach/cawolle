@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Button, Typography } from "@/components/atoms";
 import { JsonLd } from "@/components/JsonLd";
 import { PhotoGallery } from "@/components/shop/PhotoGallery";
+import { OfferMeta } from "@/components/shop/OfferMeta";
 import { readCatalog, readOffer } from "@/lib/catalog";
 import { shareMetadata } from "@/lib/metadata";
 import { breadcrumb, offerDescription, product } from "@/lib/schema";
@@ -62,8 +63,12 @@ export default async function OfferPage({ params }: OfferPageProps) {
         <PhotoGallery images={offer.images} title={offer.title} />
         <div className={styles.summary}>
           <Typography variant="h1">{offer.title}</Typography>
-          {offer.price && <p className={styles.price}>{offer.price}</p>}
-          {offer.condition && <p className={styles.condition}>{offer.condition}</p>}
+          <OfferMeta
+            price={offer.price}
+            condition={offer.condition}
+            priceClassName={styles.price}
+            conditionClassName={styles.condition}
+          />
           {offer.aspects.length > 0 && (
             <dl className={styles.aspects}>
               {offer.aspects.map((aspect) => (

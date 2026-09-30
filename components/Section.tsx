@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import type { FC, ReactNode } from "react";
 import { Typography } from "@/components/atoms";
+import { cn } from "@/lib/cn";
 import styles from "./Section.module.css";
 
 type Tone = "plain" | "beige";
@@ -15,7 +16,7 @@ type SectionProps = {
   children: ReactNode;
 };
 
-export function Section({
+export const Section: FC<SectionProps> = ({
   id,
   title,
   heading = "h2",
@@ -23,10 +24,8 @@ export function Section({
   align = "start",
   wide = false,
   children,
-}: SectionProps) {
-  const className = [styles.section, styles[tone], styles[align], wide ? styles.wide : ""]
-    .filter(Boolean)
-    .join(" ");
+}) => {
+  const className = cn(styles.section, styles[tone], styles[align], wide && styles.wide);
 
   return (
     <section id={id} className={className} data-tone={tone}>
@@ -37,4 +36,4 @@ export function Section({
       </div>
     </section>
   );
-}
+};

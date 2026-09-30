@@ -1,53 +1,26 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState, type FC } from "react";
 import type { AspectRefinement } from "@/lib/shop";
+import { AspectFilters } from "./AspectFilters";
+import { useDialog } from "./useDialog";
 import styles from "./OfferFilters.module.css";
 import { Typography } from "../atoms";
 
 type OfferFiltersProps = {
   aspects: AspectRefinement[];
-  categoryId: string;
-  dominantCategoryId: string;
   selected: Record<string, string[]>;
   onToggle: (name: string, value: string) => void;
   onReset: () => void;
 };
 
-export function OfferFilters({
-  aspects,
-  categoryId,
-  dominantCategoryId,
-  selected,
-  onToggle,
-  onReset,
-}: OfferFiltersProps) {
+export const OfferFilters: FC<OfferFiltersProps> = ({ aspects, selected, onToggle, onReset }) => {
   const panelId = useId();
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const aspectCount = Object.values(selected).reduce((sum, values) => sum + values.length, 0);
-  const categoryWasChosen =
-    categoryId !== "" && !(aspectCount > 0 && categoryId === dominantCategoryId);
-  const activeCount = aspectCount + (categoryWasChosen ? 1 : 0);
+  const close = useCallback(() => setOpen(false), []);
+  const activeCount = Object.values(selected).flat().length;
 
-  useEffect(() => {
-    const query = window.matchMedia("(max-width: 800px)");
-    const closeDrawer = () => {
-      if (!query.matches) setOpen(false);
-    };
-    query.addEventListener("change", closeDrawer);
-    return () => query.removeEventListener("change", closeDrawer);
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-
-    closeRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+  useDialog(open, close, closeRef);
 
   return (
     <div className={styles.slot}>
@@ -75,7 +48,7 @@ export function OfferFilters({
         className={open ? styles.backdrop : styles.backdropHidden}
         aria-label="Filter schließen"
         tabIndex={open ? 0 : -1}
-        onClick={() => setOpen(false)}
+        onClick={close}
       />
       <aside
         id={panelId}
@@ -93,43 +66,20 @@ export function OfferFilters({
             type="button"
             className={styles.close}
             aria-label="Filter schließen"
-            onClick={() => setOpen(false)}
+            onClick={close}
           >
             ×
           </button>
         </div>
         <div className={styles.drawerBody}>
-          {aspects.map((aspect) => (
-            <fieldset key={aspect.name} className={styles.group}>
-              <legend className={styles.label}>{aspect.name}</legend>
-              <ul className={styles.values}>
-                {aspect.values.map((entry) => {
-                  const checked = selected[aspect.name]?.includes(entry.value) ?? false;
-                  return (
-                    <li key={entry.value}>
-                      <label className={styles.option}>
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => onToggle(aspect.name, entry.value)}
-                        />
-                        <span>
-                          {entry.value} ({entry.count})
-                        </span>
-                      </label>
-                    </li>
-                  );
-                })}
-              </ul>
-            </fieldset>
-          ))}
+          <AspectFilters aspects={aspects} selected={selected} onToggle={onToggle} />
         </div>
         <div className={styles.drawerFooter}>
-          <button type="button" className={styles.done} onClick={() => setOpen(false)}>
+          <button type="button" className={styles.done} onClick={close}>
             Fertig
           </button>
         </div>
       </aside>
     </div>
   );
-}
+};

@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { Spacing, Typography } from "@/components/atoms";
+import { ExternalLink, Spacing, Typography } from "@/components/atoms";
+import { BusinessAddress } from "@/components/BusinessAddress";
 import { shareMetadata } from "@/lib/metadata";
 
 export const metadata = shareMetadata({
@@ -21,17 +21,7 @@ export default function DatenschutzPage() {
 
       <div>
         <Typography variant="h2">Verantwortliche</Typography>
-        <Typography variant="body">
-          Cawolle
-          <br />
-          Inh. Bettina Achenbach
-          <br />
-          Neue Str. 2
-          <br />
-          63584 Gründau
-          <br />
-          E-Mail: <Link href="mailto:info@cawolle.de">info[at]cawolle.de</Link>
-        </Typography>
+        <BusinessAddress linkEmail />
         <Typography variant="body">
           Eine Datenschutzbeauftragte ist nicht bestellt. Für ein Geschäft dieser Größe sind wir
           dazu nicht verpflichtet.
@@ -91,13 +81,9 @@ export default function DatenschutzPage() {
         <Typography variant="body">
           Verantwortliche bei eBay ist die eBay GmbH, Albert-Einstein-Ring 2-6, 14532 Kleinmachnow.
           Die Hinweise von eBay stehen unter{" "}
-          <Link
-            href="https://www.ebay.de/help/policies/member-behaviour-policies/user-privacy-notice-privacy-policy?id=4260"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <ExternalLink href="https://www.ebay.de/help/policies/member-behaviour-policies/user-privacy-notice-privacy-policy?id=4260">
             ebay.de/Datenschutz
-          </Link>
+          </ExternalLink>
           .
         </Typography>
       </div>
@@ -125,13 +111,9 @@ export default function DatenschutzPage() {
           USA. Rechtsgrundlage ist Artikel 6 Absatz 1 Buchstabe f DSGVO. Wir wollen sehen, welche
           Seiten genutzt werden. Eine Übermittlung in die USA stützt Vercel auf den
           Angemessenheitsbeschluss zum EU-US Data Privacy Framework. Hinweise stehen unter{" "}
-          <Link
-            href="https://vercel.com/docs/analytics/privacy-policy"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <ExternalLink href="https://vercel.com/docs/analytics/privacy-policy">
             vercel.com/docs/analytics/privacy-policy
-          </Link>
+          </ExternalLink>
           .
         </Typography>
       </div>
@@ -183,10 +165,7 @@ export default function DatenschutzPage() {
         <Typography variant="body">
           Beschwerden richten Sie an den Hessischen Beauftragten für Datenschutz und
           Informationsfreiheit, Gustav-Stresemann-Ring 1, 65189 Wiesbaden,{" "}
-          <Link href="https://datenschutz.hessen.de" target="_blank" rel="noopener noreferrer">
-            datenschutz.hessen.de
-          </Link>
-          .
+          <ExternalLink href="https://datenschutz.hessen.de">datenschutz.hessen.de</ExternalLink>.
         </Typography>
       </div>
     </Spacing>

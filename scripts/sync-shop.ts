@@ -1,40 +1,13 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { CatalogOffer } from "../lib/shop";
 import { EbayRequestError, listActiveSellerItems, loadSellerOffers } from "../services/ebay-api";
 
-loadEnv();
-
 const shopDir = path.join(process.cwd(), "data", "shop");
 const stagingDir = path.join(process.cwd(), "data", "shop-staging");
 const backupDir = path.join(process.cwd(), "data", "shop-backup");
-
-function loadEnv() {
-  let text = "";
-  try {
-    text = readFileSync(path.join(process.cwd(), ".env"), "utf8");
-  } catch {
-    return;
-  }
-
-  for (const line of text.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const separator = trimmed.indexOf("=");
-    if (separator < 1) continue;
-    const key = trimmed.slice(0, separator);
-    let value = trimmed.slice(separator + 1);
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    if (process.env[key] === undefined) process.env[key] = value;
-  }
-}
 
 async function withRetry<T>(run: () => Promise<T>) {
   try {

@@ -1,24 +1,16 @@
+import { XMLParser } from "fast-xml-parser";
 import sanitizeHtml from "sanitize-html";
 
-import {
-  formatPrice,
-  largeEbayImage,
-  type OfferDetail,
-  type OfferTeaser,
-  type ShopListing,
-} from "@/lib/shop";
+import { formatPrice, largeEbayImage, type OfferDetail } from "@/lib/shop";
 
 const SCOPE = "https://api.ebay.com/oauth/api_scope";
 const SELLER_SCOPE = "https://api.ebay.com/oauth/api_scope/sell.inventory";
-const PAGE_LIMIT = 200;
-const MAX_OFFERS = 1000;
 
 type Config = {
   clientId: string;
   clientSecret: string;
   seller: string;
   origin: string;
-  searchQuery: string;
 };
 
 type Token = { value: string; expiresAt: number };
@@ -26,29 +18,6 @@ type Token = { value: string; expiresAt: number };
 type Money = { value?: string; currency?: string };
 
 type Image = { imageUrl?: string };
-
-type Summary = {
-  itemId?: string;
-  title?: string;
-  image?: Image;
-  price?: Money;
-  currentBidPrice?: Money;
-  condition?: string;
-};
-
-type SearchPage = {
-  total?: number;
-  itemSummaries?: Summary[];
-  next?: string;
-  refinement?: {
-    dominantCategoryId?: string;
-    categoryDistributions?: { categoryId?: string; categoryName?: string; matchCount?: number }[];
-    aspectDistributions?: {
-      localizedAspectName?: string;
-      aspectValueDistributions?: { localizedAspectValue?: string; matchCount?: number }[];
-    }[];
-  };
-};
 
 type ItemResponse = {
   itemId?: string;
@@ -98,7 +67,6 @@ function readConfig(): Config | null {
     clientSecret,
     seller,
     origin: sandbox ? "https://api.sandbox.ebay.com" : "https://api.ebay.com",
-    searchQuery: process.env.EBAY_SEARCH_QUERY?.trim() ?? "",
   };
 }
 
@@ -192,215 +160,6 @@ function moneyOf(money: Money | undefined) {
     value: money.value,
     currency: money.currency,
   };
-}
-
-function escapeAspect(value: string) {
-  return value.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
-}
-
-function aspectFilter(categoryId: string, aspects: Record<string, string[]>) {
-  if (!categoryId) return null;
-
-  const groups = Object.entries(aspects)
-    .filter(([, values]) => values.length > 0)
-    .map(([name, values]) => `${escapeAspect(name)}:{${values.map(escapeAspect).join("|")}}`);
-
-  if (groups.length === 0) return null;
-  return `categoryId:${categoryId},${groups.join(",")}`;
-}
-
-function toTeaser(item: Summary): OfferTeaser | null {
-  if (!item.itemId || !item.title) return null;
-
-  return {
-    id: item.itemId,
-    title: item.title,
-    price: (moneyOf(item.price) ?? moneyOf(item.currentBidPrice))?.label ?? null,
-    imageUrl: item.image?.imageUrl ? largeEbayImage(item.image.imageUrl) : null,
-    condition: item.condition ?? null,
-  };
-}
-
-function refinementsFrom(page: SearchPage): ShopListing["refinements"] {
-  const categories = (page.refinement?.categoryDistributions ?? [])
-    .filter((category) => category.categoryId && category.categoryName)
-    .map((category) => ({
-      id: category.categoryId as string,
-      name: category.categoryName as string,
-      count: category.matchCount ?? 0,
-    }));
-
-  const aspects = (page.refinement?.aspectDistributions ?? [])
-    .filter((aspect) => aspect.localizedAspectName)
-    .map((aspect) => ({
-      name: aspect.localizedAspectName as string,
-      values: (aspect.aspectValueDistributions ?? [])
-        .filter((entry) => entry.localizedAspectValue)
-        .map((entry) => ({
-          value: entry.localizedAspectValue as string,
-          count: entry.matchCount ?? 0,
-        })),
-    }))
-    .filter((aspect) => aspect.values.length > 0);
-
-  return {
-    categories,
-    aspects,
-    categoryId: page.refinement?.dominantCategoryId ?? null,
-  };
-}
-
-function countedCategory(
-  refinements: ShopListing["refinements"],
-  categoryId: string,
-  total: number,
-): ShopListing["refinements"] {
-  if (!categoryId) return refinements;
-
-  return {
-    ...refinements,
-    categories: refinements.categories.map((category) =>
-      category.id === categoryId && category.count === 0 ? { ...category, count: total } : category,
-    ),
-  };
-}
-
-async function collectOffers(
-  config: Config,
-  input: { q: string; categoryId: string; aspects: Record<string, string[]> },
-  options?: { firstPageOnly?: boolean },
-): Promise<ShopListing & { total: number }> {
-  const params = new URLSearchParams();
-  const query = input.q.trim() || config.searchQuery;
-  if (query) params.set("q", query);
-  if (input.categoryId) params.set("category_ids", input.categoryId);
-
-  const filter = aspectFilter(input.categoryId, input.aspects);
-  if (filter) params.set("aspect_filter", filter);
-
-  params.set("filter", `sellers:{${escapeAspect(config.seller)}}`);
-  params.set("fieldgroups", "ASPECT_REFINEMENTS,CATEGORY_REFINEMENTS,EXTENDED");
-  params.set("limit", String(PAGE_LIMIT));
-
-  const offers: ShopListing["offers"] = [];
-  let path: string | null = `/buy/browse/v1/item_summary/search?${params.toString()}`;
-  let refinements: ShopListing["refinements"] | null = null;
-  let total = 0;
-  let pages = 0;
-
-  while (path && offers.length < MAX_OFFERS && pages < 6) {
-    pages += 1;
-    const page: SearchPage = await ebayGet<SearchPage>(config, path);
-    if (!refinements) {
-      refinements = refinementsFrom(page);
-      total = page.total ?? 0;
-    }
-
-    for (const item of page.itemSummaries ?? []) {
-      const teaser = toTeaser(item);
-      if (teaser) offers.push(teaser);
-      if (offers.length >= MAX_OFFERS) break;
-    }
-
-    if (options?.firstPageOnly || !page.next) break;
-    const next = new URL(page.next);
-    if (next.origin !== config.origin) break;
-    path = `${next.pathname}${next.search}`;
-  }
-
-  return {
-    offers,
-    total,
-    refinements: refinements ?? { categories: [], aspects: [], categoryId: null },
-  };
-}
-
-const defaultQueries = ["Garn", "Wolle", "Nadel", "Knopf", "Kurzwaren"];
-
-function mergeListings(listings: ShopListing[]): ShopListing {
-  const offers: ShopListing["offers"] = [];
-  const seen = new Set<string>();
-  for (const listing of listings) {
-    for (const offer of listing.offers) {
-      if (seen.has(offer.id)) continue;
-      seen.add(offer.id);
-      offers.push(offer);
-    }
-  }
-
-  const categories = new Map<string, ShopListing["refinements"]["categories"][number]>();
-  for (const listing of listings) {
-    for (const category of listing.refinements.categories) {
-      const current = categories.get(category.id);
-      if (!current || category.count > current.count) categories.set(category.id, category);
-    }
-  }
-
-  const aspects = new Map<string, Map<string, number>>();
-  for (const listing of listings) {
-    for (const aspect of listing.refinements.aspects) {
-      const values = aspects.get(aspect.name) ?? new Map<string, number>();
-      aspects.set(aspect.name, values);
-      for (const entry of aspect.values) {
-        values.set(entry.value, Math.max(values.get(entry.value) ?? 0, entry.count));
-      }
-    }
-  }
-
-  return {
-    offers,
-    refinements: {
-      categories: [...categories.values()],
-      aspects: [...aspects.entries()].map(([name, values]) => ({
-        name,
-        values: [...values.entries()].map(([value, count]) => ({ value, count })),
-      })),
-      categoryId:
-        listings.find((listing) => listing.refinements.categoryId)?.refinements.categoryId ?? null,
-    },
-  };
-}
-
-export async function searchOffers(input: {
-  q: string;
-  categoryId: string;
-  aspects: Record<string, string[]>;
-}): Promise<ShopListing> {
-  const config = requireConfig();
-  const hasAspects = Object.values(input.aspects).some((values) => values.length > 0);
-  if (input.q.trim() || input.categoryId || config.searchQuery) {
-    const listing = await collectOffers(config, input);
-    if (!hasAspects) {
-      return {
-        offers: listing.offers,
-        refinements: countedCategory(listing.refinements, input.categoryId, listing.total),
-      };
-    }
-
-    const base = await collectOffers(config, { ...input, aspects: {} }, { firstPageOnly: true });
-    return {
-      offers: listing.offers,
-      refinements: countedCategory(base.refinements, input.categoryId, base.total),
-    };
-  }
-
-  const listings: ShopListing[] = [];
-  let lastError: unknown;
-  for (const q of defaultQueries) {
-    try {
-      listings.push(await collectOffers(config, { ...input, q }));
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  if (listings.length === 0) {
-    throw lastError instanceof Error
-      ? lastError
-      : new EbayRequestError("Die Angebote konnten nicht geladen werden.", 502);
-  }
-
-  return mergeListings(listings);
 }
 
 function collectImages(item: ItemResponse) {
@@ -566,17 +325,61 @@ export type SellerListItem = {
   categoryName: string | null;
 };
 
-function xmlValue(block: string, name: string) {
-  const wrapped = block.match(new RegExp(`<${name}>([\\s\\S]*?)</${name}>`));
-  if (!wrapped) return null;
-  const cdata = wrapped[1].match(/^<!\[CDATA\[([\s\S]*?)\]\]>$/);
-  const value = (cdata?.[1] ?? wrapped[1]).trim();
-  return value
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+const sellerListParser = new XMLParser({
+  ignoreAttributes: true,
+  removeNSPrefix: true,
+  parseTagValue: false,
+  isArray: (tagName) => tagName === "Item" || tagName === "Errors",
+});
+
+type SellerListItemXml = {
+  ItemID?: unknown;
+  SellingStatus?: { ListingStatus?: unknown };
+  PrimaryCategory?: { CategoryID?: unknown; CategoryName?: unknown };
+};
+
+type SellerListDocument = {
+  GetSellerListResponse?: {
+    Ack?: unknown;
+    HasMoreItems?: unknown;
+    Errors?: { LongMessage?: unknown }[];
+    ItemArray?: { Item?: SellerListItemXml[] };
+  };
+};
+
+function text(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function readSellerList(xml: string) {
+  const parsed = sellerListParser.parse(xml) as SellerListDocument;
+  const body = parsed.GetSellerListResponse;
+  if (!body) {
+    throw new EbayRequestError("Die Angebotsliste konnte nicht gelesen werden.", 502);
+  }
+  if (text(body.Ack) === "Failure") {
+    const message = body.Errors?.map((entry) => text(entry.LongMessage)).find(
+      (entry): entry is string => Boolean(entry),
+    );
+    throw new EbayRequestError(message ?? "Die Angebotsliste konnte nicht geladen werden.", 502);
+  }
+
+  const items = (body.ItemArray?.Item ?? []).flatMap((item) => {
+    const id = text(item.ItemID);
+    if (text(item.SellingStatus?.ListingStatus) !== "Active" || !id) return [];
+    return [
+      {
+        id,
+        categoryId: text(item.PrimaryCategory?.CategoryID),
+        categoryName: text(item.PrimaryCategory?.CategoryName),
+      },
+    ];
+  });
+
+  return { items, hasMore: text(body.HasMoreItems) === "true" };
 }
 
 async function getUserAccessToken(config: Config) {
@@ -647,31 +450,14 @@ export async function listActiveSellerItems(): Promise<SellerListItem[]> {
       body: xml,
       cache: "no-store",
     });
-    const text = await response.text();
+    const responseXml = await response.text();
     if (!response.ok) {
       throw new EbayRequestError("Die Angebotsliste konnte nicht geladen werden.", response.status);
     }
-    if (xmlValue(text, "Ack") === "Failure") {
-      throw new EbayRequestError(
-        xmlValue(text, "LongMessage") ?? "Die Angebotsliste konnte nicht geladen werden.",
-        502,
-      );
-    }
 
-    for (const match of text.matchAll(/<Item>([\s\S]*?)<\/Item>/g)) {
-      const block = match[1];
-      if (xmlValue(block, "ListingStatus") !== "Active") continue;
-      const id = xmlValue(block, "ItemID");
-      if (!id) continue;
-      const primary = block.match(/<PrimaryCategory>([\s\S]*?)<\/PrimaryCategory>/)?.[1] ?? "";
-      items.push({
-        id,
-        categoryId: xmlValue(primary, "CategoryID"),
-        categoryName: xmlValue(primary, "CategoryName"),
-      });
-    }
-
-    hasMore = xmlValue(text, "HasMoreItems") === "true";
+    const sellerList = readSellerList(responseXml);
+    items.push(...sellerList.items);
+    hasMore = sellerList.hasMore;
     page += 1;
   }
 

@@ -1,14 +1,16 @@
 "use server";
 
 import { contactFieldErrors, contactSchema, readContactForm } from "@/services/contact";
-import type { ContactFieldErrors } from "@/services/contact";
+import type { ContactField, ContactFieldErrors } from "@/services/contact";
 import { sendContactEmail } from "@/services/email";
+import { siteConfig } from "@/services/site";
 
 export type ContactFormState = {
   status: "idle" | "error" | "success";
   message?: string;
   name?: string;
   fieldErrors?: ContactFieldErrors;
+  values?: Record<ContactField, string>;
 };
 
 export async function sendContactMessage(
@@ -27,6 +29,7 @@ export async function sendContactMessage(
     return {
       status: "error",
       fieldErrors: contactFieldErrors(parsed.error),
+      values: submitted,
     };
   }
 
@@ -36,8 +39,7 @@ export async function sendContactMessage(
     console.error("Contact form email failed", error);
     return {
       status: "error",
-      message:
-        "Die Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es später erneut oder schreiben Sie direkt an info@cawolle.de.",
+      message: `Die Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es später erneut oder schreiben Sie direkt an ${siteConfig.email}.`,
     };
   }
 

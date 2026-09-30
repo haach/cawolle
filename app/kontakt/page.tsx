@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Spacing, Typography } from "@/components/atoms";
+import { ExternalLink, Spacing, Typography } from "@/components/atoms";
 import { ContactForm } from "@/components/ContactForm";
 import { JsonLd } from "@/components/JsonLd";
 import { shareMetadata } from "@/lib/metadata";
 import { breadcrumb, contactPage, organization } from "@/lib/schema";
-import { siteConfig } from "@/services/site";
+import { publicEmail, siteConfig } from "@/services/site";
 
 export const metadata = shareMetadata({
   title: "Kontakt",
@@ -32,10 +32,8 @@ export default function KontaktPage() {
           Verbindung setzen.
         </Typography>
         <Spacing dir="row">
-          <Link href="mailto:info@cawolle.de">info[at]cawolle.de</Link>
-          <Link href={siteConfig.facebook} target="_blank" rel="noopener noreferrer">
-            Facebook
-          </Link>
+          <Link href={`mailto:${siteConfig.email}`}>{publicEmail()}</Link>
+          <ExternalLink href={siteConfig.facebook}>Facebook</ExternalLink>
         </Spacing>
       </div>
       <div>
