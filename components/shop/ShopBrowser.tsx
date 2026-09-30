@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   aspectRefinements,
   categoryRefinements,
+  matchesQuery,
   offerMatches,
   parseAspectParams,
   type CatalogOffer,
@@ -17,17 +18,27 @@ export function ShopBrowser({ offers }: { offers: CatalogOffer[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const categoryId = searchParams.get("category") ?? "";
+  const query = searchParams.get("q") ?? "";
   const selected = parseAspectParams(searchParams);
   const inCategory = categoryId
     ? offers.filter((offer) => offer.categoryId === categoryId)
     : offers;
   const categories = categoryRefinements(offers);
   const aspects = aspectRefinements(inCategory);
-  const visible = inCategory.filter((offer) => offerMatches(offer, "", selected));
+  const visible = inCategory.filter(
+    (offer) => matchesQuery(offer, query) && offerMatches(offer, "", selected),
+  );
 
   function replace(next: URLSearchParams) {
     const serialized = next.toString();
     router.replace(serialized ? `${pathname}?${serialized}` : pathname, { scroll: false });
+  }
+
+  function searchOffers(value: string) {
+    const next = new URLSearchParams(searchParams.toString());
+    if (value) next.set("q", value);
+    else next.delete("q");
+    replace(next);
   }
 
   function resetFilters() {
@@ -73,6 +84,17 @@ export function ShopBrowser({ offers }: { offers: CatalogOffer[] }) {
         />
       )}
       <div className={styles.results}>
+        <label className={styles.search}>
+          <span className={styles.label}>Suche</span>
+          <input
+            className={styles.control}
+            type="search"
+            name="q"
+            value={query}
+            placeholder="Titel, Marke, Farbe, Material …"
+            onChange={(event) => searchOffers(event.target.value)}
+          />
+        </label>
         {visible.length === 0 && <p className={styles.status}>Keine Angebote für diese Auswahl.</p>}
         {visible.length > 0 && (
           <>

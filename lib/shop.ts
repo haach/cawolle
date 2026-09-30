@@ -116,6 +116,24 @@ export function aspectRefinements(offers: CatalogOffer[]): AspectRefinement[] {
     );
 }
 
+export function matchesQuery(offer: CatalogOffer, query: string) {
+  const tokens = query.trim().toLocaleLowerCase("de").split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return true;
+
+  const haystack = [
+    offer.title,
+    offer.price,
+    offer.condition,
+    offer.categoryName,
+    ...offer.aspects.flatMap((aspect) => [aspect.name, aspect.value]),
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join("\n")
+    .toLocaleLowerCase("de");
+
+  return tokens.every((token) => haystack.includes(token));
+}
+
 export function offerMatches(
   offer: CatalogOffer,
   categoryId: string,
