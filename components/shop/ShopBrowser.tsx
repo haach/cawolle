@@ -136,7 +136,7 @@ export function ShopBrowser() {
         />
       )}
       <div className={styles.results}>
-        <label className={styles.search}>
+        {/* <label className={styles.search}>
           <span className={styles.label}>Suche</span>
           <input
             className={styles.control}
@@ -145,7 +145,7 @@ export function ShopBrowser() {
             placeholder="Zum Beispiel Sockenwolle"
             onChange={(event) => setDraft(event.target.value)}
           />
-        </label>
+        </label> */}
         {problem === "request" && (
           <p className={styles.error} role="alert">
             {message}
