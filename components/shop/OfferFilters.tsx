@@ -1,15 +1,13 @@
 import { useEffect, useId, useRef, useState } from "react";
-import type { AspectRefinement, CategoryRefinement } from "@/lib/shop";
+import type { AspectRefinement } from "@/lib/shop";
 import styles from "./OfferFilters.module.css";
 import { Button, Typography } from "../atoms";
 
 type OfferFiltersProps = {
-  categories: CategoryRefinement[];
   aspects: AspectRefinement[];
   categoryId: string;
   dominantCategoryId: string;
   selected: Record<string, string[]>;
-  onCategory: (id: string) => void;
   onToggle: (name: string, value: string) => void;
 };
 
@@ -61,6 +59,7 @@ export function OfferFilters({
     <div className={styles.slot}>
       <Button
         type="button"
+        className={styles.launcher}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={panelId}

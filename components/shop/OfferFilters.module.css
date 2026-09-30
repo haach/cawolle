@@ -2,7 +2,7 @@
   min-width: 0;
 }
 
-.launcher,
+.slot .launcher,
 .backdrop,
 .backdropHidden,
 .drawerHeader,
@@ -60,11 +60,18 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  max-height: 220px;
   margin: 0;
   padding: 0;
-  overflow: auto;
   list-style: none;
+
+  @media (max-width: 600px) and (min-width: 400px) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 800px) and (min-width: 601px) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .option {
@@ -137,7 +144,7 @@
 }
 
 @media (max-width: 800px) {
-  .launcher {
+  .slot .launcher {
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -4,71 +4,42 @@ import { notFound } from "next/navigation";
 import { Button, Typography } from "@/components/atoms";
 import { JsonLd } from "@/components/JsonLd";
 import { PhotoGallery } from "@/components/shop/PhotoGallery";
+import { readCatalog, readOffer } from "@/lib/catalog";
 import { shareMetadata } from "@/lib/metadata";
 import { breadcrumb, offerDescription, product } from "@/lib/schema";
-import type { OfferDetail } from "@/lib/shop";
-import { EbayConfigError, EbayRequestError, getOffer } from "@/services/ebay";
 import styles from "./page.module.css";
 
 type OfferPageProps = PageProps<"/shop/[id]">;
 
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return readCatalog().offers.map((offer) => ({ id: offer.id }));
+}
+
 export async function generateMetadata({ params }: OfferPageProps): Promise<Metadata> {
-  try {
-    const { id } = await params;
-    const offer = await getOffer(id);
-    return shareMetadata({
-      title: offer.title,
-      description: offerDescription(offer),
-      path: `/shop/${encodeURIComponent(offer.id)}`,
-      image: offer.images[0],
-    });
-  } catch {
+  const { id } = await params;
+  const offer = readOffer(id);
+  if (!offer) {
     return shareMetadata({
       title: "Angebot",
       description: "Dieses Angebot ist bei Cawolle gerade nicht verfügbar.",
       path: "/shop",
     });
   }
-}
 
-async function loadOffer(
-  id: string,
-): Promise<{ offer: OfferDetail | null; message: string | null }> {
-  try {
-    return { offer: await getOffer(id), message: null };
-  } catch (error) {
-    if (error instanceof EbayRequestError && error.status === 404) {
-      return { offer: null, message: null };
-    }
-
-    const message =
-      error instanceof EbayConfigError
-        ? "Der Shop ist noch nicht mit eBay verbunden."
-        : error instanceof EbayRequestError
-          ? error.message
-          : "Das Angebot konnte nicht geladen werden.";
-
-    return { offer: null, message };
-  }
+  return shareMetadata({
+    title: offer.title,
+    description: offerDescription(offer),
+    path: `/shop/${encodeURIComponent(offer.id)}`,
+    image: offer.images[0],
+  });
 }
 
 export default async function OfferPage({ params }: OfferPageProps) {
   const { id } = await params;
-  const { offer, message } = await loadOffer(id);
-
-  if (!offer && !message) notFound();
-
-  if (!offer) {
-    return (
-      <article className={styles.fallback}>
-        <Typography variant="h1">Angebot</Typography>
-        <p>{message}</p>
-        <Link href="/shop" className={styles.back}>
-          Zurück zum Shop
-        </Link>
-      </article>
-    );
-  }
+  const offer = readOffer(id);
+  if (!offer) notFound();
 
   const productSchema = product(offer);
 

@@ -36,6 +36,11 @@ yarn-error.log*
 .env*
 !.env.example
 
+# generated shop snapshot
+/data/shop/
+/data/shop-staging/
+/data/shop-backup/
+
 # vercel
 .vercel
 
