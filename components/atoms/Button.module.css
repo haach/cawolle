@@ -25,7 +25,7 @@
 
 .solid {
   border-radius: var(--radius-sm);
-  padding: var(--space-16) var(--space-55);
+  padding: var(--space-15) var(--space-40);
 }
 
 .solid:hover,
@@ -38,7 +38,7 @@
 
 .pill {
   border-radius: var(--radius-pill);
-  padding: var(--space-20) var(--space-55);
+  padding: var(--space-15) var(--space-40);
 }
 
 .pill:hover,

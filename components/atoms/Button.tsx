@@ -11,7 +11,7 @@ type ButtonProps = {
 } & Omit<ComponentProps<"button">, "children">;
 
 export const Button: React.FC<ButtonProps> = ({
-  variant = "solid",
+  variant = "pill",
   href,
   className,
   children,
