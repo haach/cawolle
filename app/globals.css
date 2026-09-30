@@ -9,6 +9,7 @@
 html {
   scroll-behavior: smooth;
   overflow-x: clip;
+  overflow-y: auto;
 }
 
 body {

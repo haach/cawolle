@@ -179,10 +179,7 @@ async function ebayGet<T>(config: Config, path: string, retry = true): Promise<T
 
   if (!response.ok) {
     const detail = await response.text();
-    throw new EbayRequestError(
-      detail.slice(0, 400) || "eBay hat die Anfrage abgelehnt.",
-      response.status,
-    );
+    throw new EbayRequestError(ebayErrorMessage(detail), response.status);
   }
 
   return (await response.json()) as T;
@@ -393,12 +390,56 @@ function cleanDescription(html: string | undefined) {
   });
 }
 
+function itemPath(id: string) {
+  const decoded = decodeItemId(id);
+  const match = /^v1\|([^|]+)\|([^|]+)$/.exec(decoded);
+  if (!match) return `/buy/browse/v1/item/${encodeURIComponent(decoded)}?fieldgroups=PRODUCT`;
+
+  const params = new URLSearchParams({ legacy_item_id: match[1], fieldgroups: "PRODUCT" });
+  if (match[2] !== "0") params.set("legacy_variation_id", match[2]);
+  return `/buy/browse/v1/item/get_item_by_legacy_id?${params.toString()}`;
+}
+
+function decodeItemId(id: string) {
+  let current = id;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const decoded = decodeURIComponent(current);
+      if (decoded === current) return current;
+      current = decoded;
+    } catch {
+      return current;
+    }
+  }
+  return current;
+}
+
+function ebayErrorMessage(detail: string) {
+  const trimmed = detail.trim();
+  if (trimmed.startsWith("{")) {
+    try {
+      const body = JSON.parse(trimmed) as {
+        errors?: { message?: string }[];
+        error_description?: string;
+      };
+      const message =
+        body.errors?.find((entry) => entry.message)?.message ?? body.error_description;
+      if (message) return message;
+    } catch {
+      // The body is not JSON. Fall through to the generic message.
+    }
+  }
+
+  if (trimmed.startsWith("<") || /<!doctype html/i.test(trimmed)) {
+    return "eBay hat die Anfrage abgelehnt.";
+  }
+
+  return trimmed.slice(0, 240) || "eBay hat die Anfrage abgelehnt.";
+}
+
 export const getOffer = cache(async (id: string): Promise<OfferDetail> => {
   const config = requireConfig();
-  const item = await ebayGet<ItemResponse>(
-    config,
-    `/buy/browse/v1/item/${encodeURIComponent(id)}?fieldgroups=PRODUCT`,
-  );
+  const item = await ebayGet<ItemResponse>(config, itemPath(id));
 
   if (!item.itemId || !item.title) {
     throw new EbayRequestError("Das Angebot wurde nicht gefunden.", 404);
