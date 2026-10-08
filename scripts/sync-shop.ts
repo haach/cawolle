@@ -87,7 +87,7 @@ async function main() {
     }),
   );
   await publish(stagingDir);
-  console.log(`Shop-Katalog: ${offers.length} Angebote`);
+  console.log(`✅ downloaded ${offers.length} offers from eBay`);
 }
 
 main().catch((error: unknown) => {
