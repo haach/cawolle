@@ -34,7 +34,17 @@
     "Stickgarn",
     "Vercel",
     "Zitron",
-    "zitron"
+    "zitron",
+    "Bleu",
+    "Brombeer",
+    "Cyclam",
+    "Ekru",
+    "Himbeer",
+    "Kanarien",
+    "Minz",
+    "Schoko",
+    "Zyan",
+    "Zyklam"
   ],
   "ignoreRegExpList": ["/href:\\s*[\"'][^\"']+[\"']/g"],
   "ignorePaths": ["node_modules", ".next", "archive", "package-lock.json", "*.tsbuildinfo"]

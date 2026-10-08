@@ -87,7 +87,197 @@ const FILTER_ASPECTS = ["Material", "Farbe", "Marke", "Produktart", "Lauflänge"
 const filterAspectOrder = new Map(FILTER_ASPECTS.map((name, index) => [name, index]));
 
 // A value belongs to every group whose name it contains: Silbergrau → Grau, Seide mit Baumwolle → Seide and Baumwolle.
-// Aliases join that group even when the group name is not part of the value.
+// Shade names from yarn color cards join that group even when the group name is absent: Marine → Blau, Ocker → Gelb, Rose → Rosa.
+// Guards are longer color words that only contain a shorter shade by accident: Frost is not Rost, Primrose is not Rose.
+const FARBE_GUARDS = ["Frost", "Primrose", "Mediterranean", "Mangold"];
+const FARBE_MEMBERS = {
+  Apricot: ["Pfirsich", "Peach"],
+  Beige: ["Camel", "Sand", "Bast", "Leinen", "Linen", "Haut", "Nude"],
+  Blau: [
+    "Marine",
+    "Navy",
+    "Jeans",
+    "Denim",
+    "Kobalt",
+    "Cobalt",
+    "Azur",
+    "Indigo",
+    "Royal",
+    "Himmel",
+    "Saphir",
+    "Sapphire",
+    "Ultramarin",
+    "Kornblume",
+    "Fjord",
+    "Bleu",
+    "Blue",
+    "Mediterranean",
+  ],
+  Bordeaux: ["Burgund"],
+  Braun: [
+    "Schlamm",
+    "Schoko",
+    "Chocolate",
+    "Mokka",
+    "Mocha",
+    "Kakao",
+    "Cocoa",
+    "Kaffee",
+    "Coffee",
+    "Espresso",
+    "Cappuccino",
+    "Kastanie",
+    "Chestnut",
+    "Marone",
+    "Zimt",
+    "Cinnamon",
+    "Nougat",
+    "Cognac",
+    "Karamell",
+    "Caramel",
+    "Kupfer",
+    "Copper",
+    "Bronze",
+    "Umbra",
+    "Sepia",
+    "Tabak",
+    "Tobacco",
+    "Nuss",
+    "Mahagoni",
+    "Lehm",
+    "Brown",
+  ],
+  Cotto: ["Terra"],
+  Creme: [
+    "Vanille",
+    "Eierschale",
+    "Elfenbein",
+    "Ivory",
+    "Champagne",
+    "Magnolie",
+    "Magnolia",
+    "Sahne",
+    "Cream",
+  ],
+  Flieder: ["Lavendel", "Lavender"],
+  Gelb: [
+    "Ocker",
+    "Ochre",
+    "Ocher",
+    "Senf",
+    "Mustard",
+    "Zitron",
+    "Lemon",
+    "Limone",
+    "Kanarien",
+    "Safran",
+    "Mais",
+    "Curry",
+    "Honig",
+    "Sonne",
+    "Raps",
+    "Primrose",
+    "Yellow",
+  ],
+  Gold: ["Bernstein", "Amber", "Messing", "Brass"],
+  Grau: [
+    "Anthrazit",
+    "Charcoal",
+    "Graphit",
+    "Asche",
+    "Silber",
+    "Silver",
+    "Platin",
+    "Maus",
+    "Elefant",
+    "Nebel",
+    "Rauch",
+    "Schiefer",
+    "Slate",
+    "Beton",
+    "Zement",
+    "Taupe",
+    "Stahl",
+    "Greige",
+    "Grey",
+    "Gray",
+  ],
+  Grün: [
+    "Apfel",
+    "Gras",
+    "Moos",
+    "Moss",
+    "Tanne",
+    "Smaragd",
+    "Emerald",
+    "Kiwi",
+    "Pistazie",
+    "Pistachio",
+    "Salbei",
+    "Sage",
+    "Jade",
+    "Eukalyptus",
+    "Eucalyptus",
+    "Avocado",
+    "Farn",
+    "Lime",
+    "Mangold",
+    "Schilf",
+    "Gruen",
+    "Green",
+  ],
+  Lila: ["Orchid"],
+  Mint: ["Minz"],
+  Natur: ["Ecru", "Ekru", "Ungefärbt"],
+  Oliv: ["Kaki", "Khaki"],
+  Orange: [
+    "Mandarine",
+    "Tangerine",
+    "Koralle",
+    "Coral",
+    "Lachs",
+    "Salmon",
+    "Mango",
+    "Papaya",
+    "Rost",
+    "Rust",
+  ],
+  Petrol: ["Teal"],
+  Pink: ["Fuchsia", "Fuchsie", "Magenta", "Zyklam", "Cyclam", "Himbeer", "Raspberry", "Flamingo"],
+  Rosa: ["Rose", "Malve", "Mauve", "Blush", "Azalee", "Puder"],
+  Rot: [
+    "Kirsch",
+    "Chili",
+    "Chilli",
+    "Tomate",
+    "Karmin",
+    "Scharlach",
+    "Rubin",
+    "Ruby",
+    "Ziegel",
+    "Amarant",
+    "Erdbeere",
+    "Johannisbeere",
+    "Red",
+  ],
+  Schwarz: ["Kohle", "Onyx", "Ebenholz", "Ebony", "Obsidian", "Black"],
+  Türkis: ["Aqua", "Cyan", "Zyan", "Turquoise", "Tuerkis", "Karibik", "Lagune"],
+  Violett: [
+    "Pflaume",
+    "Plum",
+    "Aubergine",
+    "Brombeer",
+    "Amethyst",
+    "Purpur",
+    "Purple",
+    "Violet",
+    "Viola",
+    "Blaubeere",
+    "Heidelbeere",
+  ],
+  Weiß: ["Schnee", "Snow", "White", "Kreide"],
+} as const;
+
 const ASPECT_GROUPS: Record<string, string[]> = {
   Material: [
     "Alpaca",
@@ -100,33 +290,7 @@ const ASPECT_GROUPS: Record<string, string[]> = {
     "Seide",
     "Sockengarne",
   ],
-  Farbe: [
-    "Apricot",
-    "Beige",
-    "Blau",
-    "Bordeaux",
-    "Braun",
-    "Cotto",
-    "Creme",
-    "Flieder",
-    "Gelb",
-    "Gold",
-    "Grau",
-    "Grün",
-    "Lila",
-    "Mint",
-    "Natur",
-    "Oliv",
-    "Orange",
-    "Petrol",
-    "Pink",
-    "Rosa",
-    "Rot",
-    "Schwarz",
-    "Türkis",
-    "Violett",
-    "Weiß",
-  ],
+  Farbe: Object.keys(FARBE_MEMBERS),
 };
 
 const ASPECT_ALIASES: Record<string, Record<string, string>> = {
@@ -136,9 +300,11 @@ const ASPECT_ALIASES: Record<string, Record<string, string>> = {
     Kaschmir: "Cashmere",
     Sockengarn: "Sockengarne",
   },
-  Farbe: {
-    Schlamm: "Braun",
-  },
+  Farbe: Object.fromEntries(
+    Object.entries(FARBE_MEMBERS).flatMap(([group, members]) =>
+      members.map((member) => [member, group]),
+    ),
+  ),
 };
 
 function normalizeLabel(value: string) {
@@ -159,6 +325,7 @@ const normalizedAspectGroups = new Map(
         alias: normalizeLabel(alias),
         group,
       })),
+      guards: (aspect === "Farbe" ? FARBE_GUARDS : []).map((guard) => normalizeLabel(guard)),
     },
   ]),
 );
@@ -170,13 +337,37 @@ function groupedValues(aspectName: string, value: string) {
   const normalized = normalizeLabel(value);
   const matches = new Set(
     grouping.groups
-      .filter((group) => normalized.includes(group.normalized))
+      .filter((group) => containsUnguarded(normalized, group.normalized, grouping.guards))
       .map((group) => group.name),
   );
   for (const alias of grouping.aliases) {
-    if (normalized.includes(alias.alias)) matches.add(alias.group);
+    if (containsUnguarded(normalized, alias.alias, grouping.guards)) matches.add(alias.group);
   }
   return matches.size > 0 ? [...matches] : [value.trim()];
+}
+
+function containsUnguarded(normalized: string, term: string, guards: string[]) {
+  let from = 0;
+  while (from <= normalized.length - term.length) {
+    const index = normalized.indexOf(term, from);
+    if (index < 0) return false;
+    const insideGuard = guards.some((guard) => spanInside(normalized, guard, index, term.length));
+    if (!insideGuard) return true;
+    from = index + 1;
+  }
+  return false;
+}
+
+function spanInside(normalized: string, guard: string, index: number, length: number) {
+  if (guard.length <= length) return false;
+  let from = 0;
+  while (from <= normalized.length - guard.length) {
+    const at = normalized.indexOf(guard, from);
+    if (at < 0) return false;
+    if (index >= at && index + length <= at + guard.length) return true;
+    from = at + 1;
+  }
+  return false;
 }
 
 function sameGroup(group: string, selected: string) {

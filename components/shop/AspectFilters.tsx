@@ -8,6 +8,34 @@ type AspectFiltersProps = {
   onToggle: (name: string, value: string) => void;
 };
 
+const FARBE_SWATCHES: Record<string, string> = {
+  Apricot: "#e8926a",
+  Beige: "#c6ad86",
+  Blau: "#3d6fbf",
+  Bordeaux: "#72243e",
+  Braun: "#7a4e2d",
+  Cotto: "#c4623a",
+  Creme: "#f3e5c4",
+  Flieder: "#c9a6d8",
+  Gelb: "#e3c200",
+  Gold: "#c6a03a",
+  Grau: "#8d8d8d",
+  Grün: "#3e7d46",
+  Lila: "#7a4e9d",
+  Mint: "#7dcec0",
+  Natur: "#e4d5bc",
+  Oliv: "#6d7334",
+  Orange: "#e07020",
+  Petrol: "#1d6e78",
+  Pink: "#e45b93",
+  Rosa: "#e9a3b5",
+  Rot: "#c43737",
+  Schwarz: "#222222",
+  Türkis: "#2aa8b8",
+  Violett: "#5e2f8a",
+  Weiß: "#ffffff",
+};
+
 export const AspectFilters: FC<AspectFiltersProps> = ({ aspects, selected, onToggle }) => (
   <>
     {aspects.map((aspect) => (
@@ -25,7 +53,15 @@ export const AspectFilters: FC<AspectFiltersProps> = ({ aspects, selected, onTog
                     onChange={() => onToggle(aspect.name, entry.value)}
                   />
                   <span>
-                    {entry.value} ({entry.count})
+                    {entry.value}
+                    {aspect.name === "Farbe" && FARBE_SWATCHES[entry.value] ? (
+                      <span
+                        className={styles.swatch}
+                        style={{ backgroundColor: FARBE_SWATCHES[entry.value] }}
+                        aria-hidden="true"
+                      />
+                    ) : null}{" "}
+                    ({entry.count})
                   </span>
                 </label>
               </li>
