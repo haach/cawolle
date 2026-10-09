@@ -146,6 +146,97 @@
   border-radius: 2px;
 }
 
+.values.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.branch {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+
+.branch .option {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.disclosure {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 3px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-brand);
+  cursor: pointer;
+  padding: 0;
+}
+
+.disclosureRing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.disclosureRing rect {
+  fill: none;
+  stroke: var(--color-beige-border);
+  stroke-width: 1.5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.45s ease-out;
+}
+
+.disclosure:hover .disclosureRing rect,
+.disclosure:focus-visible .disclosureRing rect {
+  stroke-dashoffset: 0;
+}
+
+.disclosure:hover,
+.disclosure:focus-visible {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disclosureRing rect {
+    transition: none;
+  }
+}
+
+.disclosureMark {
+  position: relative;
+  width: 0.6em;
+  height: 0.6em;
+  margin-left: -0.3em;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.disclosure[aria-expanded="true"] .disclosureMark {
+  margin-top: -0.15em;
+  margin-left: 0;
+  transform: rotate(135deg);
+}
+
+.lengths {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 0 0 1.6rem;
+  list-style: none;
+}
+
 .done {
   border: 1px solid var(--color-brand-dark);
   border-radius: var(--radius-sm);

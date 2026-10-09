@@ -1,6 +1,7 @@
 .spacing {
   display: flex;
   gap: var(--spacing);
+  align-items: center;
 }
 
 .col {

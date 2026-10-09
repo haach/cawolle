@@ -17,9 +17,17 @@ export type ShopCatalog = {
   offers: CatalogOffer[];
 };
 
+export type AspectValue = {
+  value: string;
+  count: number;
+  label?: string;
+  children?: AspectValue[];
+};
+
 export type AspectRefinement = {
   name: string;
-  values: { value: string; count: number }[];
+  label?: string;
+  values: AspectValue[];
 };
 
 export type OfferDetail = {
@@ -374,6 +382,80 @@ function sameGroup(group: string, selected: string) {
   return normalizeLabel(group) === normalizeLabel(selected);
 }
 
+const WEIGHT_PATTERN = /(\d+)\s*g\b/i;
+const LENGTH_PATTERN = /(\d+)\s*m\b/i;
+
+function laufParts(value: string) {
+  const weight = value.match(WEIGHT_PATTERN);
+  if (!weight) return null;
+  const length = value.match(LENGTH_PATTERN);
+  return {
+    weight: Number(weight[1]),
+    length: length ? Number(length[1]) : null,
+  };
+}
+
+function selectedLauf(value: string) {
+  const match = value.match(/^(\d+) g(?::(\d+) m)?$/);
+  if (!match) return null;
+  return {
+    weight: Number(match[1]),
+    length: match[2] ? Number(match[2]) : null,
+  };
+}
+
+function laufRefinement(offers: CatalogOffer[]): AspectRefinement | null {
+  const weights = new Map<number, { count: number; lengths: Map<number, number> }>();
+
+  for (const offer of offers) {
+    const seenWeights = new Set<number>();
+    const seenLengths = new Set<string>();
+    for (const aspect of offer.aspects) {
+      if (aspect.name !== "Lauflänge") continue;
+      const parts = laufParts(aspect.value);
+      if (!parts || seenWeights.has(parts.weight)) continue;
+      seenWeights.add(parts.weight);
+      const group = weights.get(parts.weight) ?? { count: 0, lengths: new Map<number, number>() };
+      group.count += 1;
+      weights.set(parts.weight, group);
+      if (parts.length == null) continue;
+      const key = `${parts.weight}:${parts.length}`;
+      if (seenLengths.has(key)) continue;
+      seenLengths.add(key);
+      group.lengths.set(parts.length, (group.lengths.get(parts.length) ?? 0) + 1);
+    }
+  }
+
+  if (weights.size === 0) return null;
+
+  return {
+    name: "Lauflänge",
+    label: "Gewicht",
+    values: [...weights.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([weight, group]) => ({
+        value: `${weight} g`,
+        count: group.count,
+        children: [...group.lengths.entries()]
+          .sort((a, b) => a[0] - b[0])
+          .map(([length, count]) => ({
+            value: `${weight} g:${length} m`,
+            label: `${length} m`,
+            count,
+          })),
+      })),
+  };
+}
+
+function laufValueMatches(aspectValue: string, selected: string) {
+  const want = selectedLauf(selected);
+  if (!want) return aspectValue === selected;
+  const offer = laufParts(aspectValue);
+  if (!offer || offer.weight !== want.weight) return false;
+  if (want.length == null) return true;
+  return offer.length === want.length;
+}
+
 function recordRefinement(
   aspects: Map<string, Map<string, number>>,
   seen: Set<string>,
@@ -393,12 +475,14 @@ export function aspectRefinements(offers: CatalogOffer[]): AspectRefinement[] {
   for (const offer of offers) {
     const seen = new Set<string>();
     for (const aspect of offer.aspects) {
-      if (!filterAspectOrder.has(aspect.name)) continue;
+      if (!filterAspectOrder.has(aspect.name) || aspect.name === "Lauflänge") continue;
       for (const value of groupedValues(aspect.name, aspect.value)) {
         recordRefinement(aspects, seen, aspect.name, value);
       }
     }
   }
+
+  const lauf = laufRefinement(offers);
 
   return [...aspects.entries()]
     .map(([name, values]) => ({
@@ -407,6 +491,7 @@ export function aspectRefinements(offers: CatalogOffer[]): AspectRefinement[] {
         .map(([value, count]) => ({ value, count }))
         .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "de")),
     }))
+    .concat(lauf ? [lauf] : [])
     .sort(
       (a, b) =>
         (filterAspectOrder.get(a.name) ?? FILTER_ASPECTS.length) -
@@ -433,6 +518,7 @@ export function matchesQuery(offer: CatalogOffer, query: string) {
 }
 
 function aspectValueMatches(name: string, aspectValue: string, selected: string) {
+  if (name === "Lauflänge") return laufValueMatches(aspectValue, selected);
   if (!normalizedAspectGroups.has(name)) return aspectValue === selected;
   return groupedValues(name, aspectValue).some((group) => sameGroup(group, selected));
 }

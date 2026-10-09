@@ -62,6 +62,8 @@
   --radius-full: 50%;
 
   /* Spacing that appears as padding or margin on the live pages. */
+  --space-0: 0px;
+  --space-2: 2px;
   --space-5: 5px;
   --space-10: 10px;
   --space-15: 15px;
