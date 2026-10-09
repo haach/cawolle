@@ -90,7 +90,14 @@ export function withToggledAspect(params: URLSearchParams, name: string, value: 
   return next;
 }
 
-const FILTER_ASPECTS = ["Material", "Farbe", "Marke", "Produktart", "Lauflänge", "Stil", "Form"];
+const FILTER_ASPECTS = [
+  "Material",
+  "Farbe",
+  "Marke",
+  "Produktart",
+  "Lauflänge",
+  /* "Stil", */ "Form",
+];
 
 const filterAspectOrder = new Map(FILTER_ASPECTS.map((name, index) => [name, index]));
 
