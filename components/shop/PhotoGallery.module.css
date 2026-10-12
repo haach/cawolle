@@ -19,11 +19,6 @@
   aspect-ratio: 1;
 }
 
-.main img,
-.thumb img {
-  object-fit: contain;
-}
-
 .main:focus-visible,
 .thumb:focus-visible,
 .open:focus-visible {

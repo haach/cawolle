@@ -23,12 +23,9 @@
   position: relative;
   display: grid;
   place-items: center;
+  overflow: hidden;
   aspect-ratio: 1;
   background: var(--color-beige);
-}
-
-.media img {
-  object-fit: contain;
 }
 
 .placeholder {

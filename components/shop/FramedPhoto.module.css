@@ -1,0 +1,10 @@
+.backdrop {
+  object-fit: cover;
+  transform: scale(1.15);
+  filter: blur(20px);
+}
+
+.photo {
+  z-index: 1;
+  object-fit: contain;
+}
