@@ -120,7 +120,9 @@ const filterAspectOrder = new Map(FILTER_ASPECTS.map((name, index) => [name, ind
 // Shade names from yarn color cards join that group even when the group name is absent: Marine → Blau, Ocker → Gelb, Rose → Rosa.
 // Guards are longer color words that only contain a shorter shade by accident: Frost is not Rost, Primrose is not Rose.
 // A bare number is a gradient colorway code, not its own color: 580 joins Farbverlauf, and also every color named in the title segment before that code.
+// A Produktart of Verlaufswolle or Verlaufsgarn joins Farbverlauf as well. The colorway number stays its own filter.
 export const FARBVERLAUF = "Farbverlauf";
+const GRADIENT_PRODUCT_TYPES = ["verlaufswolle", "verlaufsgarn"];
 const FARBE_GUARDS = ["Frost", "Primrose", "Mediterranean", "Mangold"];
 const FARBE_MEMBERS = {
   Apricot: ["Pfirsich", "Peach"],
@@ -372,6 +374,17 @@ function isColorwayCode(value: string) {
   return /^\d+$/.test(value.trim());
 }
 
+function isGradientProductType(value: string) {
+  const normalized = normalizeLabel(value);
+  return GRADIENT_PRODUCT_TYPES.some((type) => normalized.includes(type));
+}
+
+function hasGradientProductType(offer: CatalogOffer) {
+  return offer.aspects.some(
+    (aspect) => aspect.name === "Produktart" && isGradientProductType(aspect.value),
+  );
+}
+
 function colorPhrase(title: string, code: string) {
   const trimmed = title.trim();
   const suffix = `, ${code.trim()}`;
@@ -534,6 +547,9 @@ export function aspectRefinements(offers: CatalogOffer[]): AspectRefinement[] {
         recordRefinement(aspects, seen, aspect.name, value);
       }
     }
+    if (hasGradientProductType(offer)) {
+      recordRefinement(aspects, seen, "Farbe", FARBVERLAUF);
+    }
   }
 
   const lauf = laufRefinement(offers);
@@ -590,12 +606,15 @@ export function offerMatches(offer: CatalogOffer, aspects: Record<string, string
   return Object.entries(aspects).every(([name, values]) => {
     if (values.length === 0) return true;
     if (name === COLORWAY_ASPECT) return values.some((value) => colorwayMatches(offer, value));
-    return values.some((value) =>
-      offer.aspects.some(
+    return values.some((value) => {
+      if (name === "Farbe" && sameGroup(value, FARBVERLAUF) && hasGradientProductType(offer)) {
+        return true;
+      }
+      return offer.aspects.some(
         (aspect) =>
           aspect.name === name && aspectValueMatches(name, aspect.value, value, offer.title),
-      ),
-    );
+      );
+    });
   });
 }
 
