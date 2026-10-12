@@ -43,6 +43,41 @@ export type OfferDetail = {
   itemWebUrl: string | null;
 };
 
+const REQUIRED_ASPECTS = ["Farbe", "Material", "Marke", "Produktart", "Lauflänge", "Form"];
+
+function filled(value: string | null | undefined) {
+  return Boolean(value?.trim());
+}
+
+function descriptionText(html: string) {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function missingOfferFields(offer: OfferDetail) {
+  const missing: string[] = [];
+  if (!filled(offer.title)) missing.push("Title");
+  if (!filled(offer.price)) missing.push("Price");
+  if (!offer.images.some((image) => image.trim())) missing.push("Image");
+  if (!filled(offer.condition)) missing.push("Condition");
+  if (!descriptionText(offer.descriptionHtml)) missing.push("Description");
+  if (!filled(offer.itemWebUrl)) missing.push("eBay link");
+
+  for (const name of REQUIRED_ASPECTS) {
+    const present = offer.aspects.some(
+      (aspect) =>
+        aspect.name.localeCompare(name, "de", { sensitivity: "base" }) === 0 &&
+        filled(aspect.value),
+    );
+    if (!present) missing.push(name);
+  }
+
+  return missing;
+}
+
 export function parseAspectParams(params: URLSearchParams): Record<string, string[]> {
   const aspects: Record<string, string[]> = {};
 

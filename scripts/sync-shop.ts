@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import type { CatalogOffer } from "../lib/shop";
+import { missingOfferFields, type CatalogOffer } from "../lib/shop";
 import { EbayRequestError, listActiveSellerItems, loadSellerOffers } from "../services/ebay-api";
 
 const shopDir = path.join(process.cwd(), "data", "shop");
@@ -88,6 +88,16 @@ async function main() {
   );
   await publish(stagingDir);
   console.log(`✅ downloaded ${offers.length} offers from eBay`);
+
+  const incomplete = offers.flatMap(({ detail }) => {
+    const missing = missingOfferFields(detail);
+    if (missing.length === 0) return [];
+    return [{ title: detail.title, link: detail.itemWebUrl, missing }];
+  });
+  if (incomplete.length > 0) {
+    console.log(`${incomplete.length} offers are missing required fields:`);
+    console.log(incomplete);
+  }
 }
 
 main().catch((error: unknown) => {
