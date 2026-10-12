@@ -71,23 +71,38 @@ export function withoutAspects(params: URLSearchParams) {
   return next;
 }
 
+function writeAspects(params: URLSearchParams, selected: Record<string, string[]>) {
+  const next = new URLSearchParams(params);
+  next.delete("aspect");
+
+  for (const [aspectName, aspectValues] of Object.entries(selected)) {
+    for (const aspectValue of aspectValues) {
+      if (!aspectValue) continue;
+      next.append("aspect", `${aspectName}:${aspectValue}`);
+    }
+  }
+
+  return next;
+}
+
 export function withToggledAspect(params: URLSearchParams, name: string, value: string) {
   const current = parseAspectParams(params);
   const values = current[name] ?? [];
   const nextValues = values.includes(value)
     ? values.filter((entry) => entry !== value)
     : [...values, value];
-  const selected = { ...current, [name]: nextValues };
-  const next = new URLSearchParams(params);
-  next.delete("aspect");
+  return writeAspects(params, { ...current, [name]: nextValues });
+}
 
-  for (const [aspectName, aspectValues] of Object.entries(selected)) {
-    for (const aspectValue of aspectValues) {
-      next.append("aspect", `${aspectName}:${aspectValue}`);
-    }
-  }
+export const COLORWAY_ASPECT = "Farbverlaufs-Nummer";
 
-  return next;
+export function withColorway(params: URLSearchParams, value: string) {
+  const digits = value.replace(/\D/g, "");
+  const current = parseAspectParams(params);
+  return writeAspects(params, {
+    ...current,
+    [COLORWAY_ASPECT]: digits ? [digits] : [],
+  });
 }
 
 const FILTER_ASPECTS = [
@@ -104,6 +119,8 @@ const filterAspectOrder = new Map(FILTER_ASPECTS.map((name, index) => [name, ind
 // A value belongs to every group whose name it contains: Silbergrau → Grau, Seide mit Baumwolle → Seide and Baumwolle.
 // Shade names from yarn color cards join that group even when the group name is absent: Marine → Blau, Ocker → Gelb, Rose → Rosa.
 // Guards are longer color words that only contain a shorter shade by accident: Frost is not Rost, Primrose is not Rose.
+// A bare number is a gradient colorway code, not its own color: 580 joins Farbverlauf, and also every color named in the title segment before that code.
+export const FARBVERLAUF = "Farbverlauf";
 const FARBE_GUARDS = ["Frost", "Primrose", "Mediterranean", "Mangold"];
 const FARBE_MEMBERS = {
   Apricot: ["Pfirsich", "Peach"],
@@ -331,7 +348,13 @@ function normalizeLabel(value: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-const normalizedAspectGroups = new Map(
+type AspectGrouping = {
+  groups: { name: string; normalized: string }[];
+  aliases: { alias: string; group: string }[];
+  guards: string[];
+};
+
+const normalizedAspectGroups = new Map<string, AspectGrouping>(
   Object.entries(ASPECT_GROUPS).map(([aspect, groups]) => [
     aspect,
     {
@@ -345,10 +368,20 @@ const normalizedAspectGroups = new Map(
   ]),
 );
 
-function groupedValues(aspectName: string, value: string) {
-  const grouping = normalizedAspectGroups.get(aspectName);
-  if (!grouping) return [value];
+function isColorwayCode(value: string) {
+  return /^\d+$/.test(value.trim());
+}
 
+function colorPhrase(title: string, code: string) {
+  const trimmed = title.trim();
+  const suffix = `, ${code.trim()}`;
+  if (!trimmed.endsWith(suffix)) return "";
+  const head = trimmed.slice(0, -suffix.length);
+  const comma = head.lastIndexOf(",");
+  return (comma >= 0 ? head.slice(comma + 1) : head).trim();
+}
+
+function matchingGroups(grouping: AspectGrouping, value: string) {
   const normalized = normalizeLabel(value);
   const matches = new Set(
     grouping.groups
@@ -358,7 +391,21 @@ function groupedValues(aspectName: string, value: string) {
   for (const alias of grouping.aliases) {
     if (containsUnguarded(normalized, alias.alias, grouping.guards)) matches.add(alias.group);
   }
-  return matches.size > 0 ? [...matches] : [value.trim()];
+  return [...matches];
+}
+
+function groupedValues(aspectName: string, value: string, title = "") {
+  const grouping = normalizedAspectGroups.get(aspectName);
+  if (!grouping) return [value];
+
+  if (aspectName === "Farbe" && isColorwayCode(value)) {
+    const phrase = colorPhrase(title, value);
+    const named = phrase ? matchingGroups(grouping, phrase) : [];
+    return [...new Set([...named, FARBVERLAUF])];
+  }
+
+  const matches = matchingGroups(grouping, value);
+  return matches.length > 0 ? matches : [value.trim()];
 }
 
 function containsUnguarded(normalized: string, term: string, guards: string[]) {
@@ -483,7 +530,7 @@ export function aspectRefinements(offers: CatalogOffer[]): AspectRefinement[] {
     const seen = new Set<string>();
     for (const aspect of offer.aspects) {
       if (!filterAspectOrder.has(aspect.name) || aspect.name === "Lauflänge") continue;
-      for (const value of groupedValues(aspect.name, aspect.value)) {
+      for (const value of groupedValues(aspect.name, aspect.value, offer.title)) {
         recordRefinement(aspects, seen, aspect.name, value);
       }
     }
@@ -524,18 +571,29 @@ export function matchesQuery(offer: CatalogOffer, query: string) {
   return tokens.every((token) => haystack.includes(token));
 }
 
-function aspectValueMatches(name: string, aspectValue: string, selected: string) {
+function aspectValueMatches(name: string, aspectValue: string, selected: string, title: string) {
   if (name === "Lauflänge") return laufValueMatches(aspectValue, selected);
   if (!normalizedAspectGroups.has(name)) return aspectValue === selected;
-  return groupedValues(name, aspectValue).some((group) => sameGroup(group, selected));
+  return groupedValues(name, aspectValue, title).some((group) => sameGroup(group, selected));
+}
+
+function colorwayMatches(offer: CatalogOffer, selected: string) {
+  const code = selected.trim();
+  if (!isColorwayCode(code)) return false;
+  return offer.aspects.some(
+    (aspect) =>
+      aspect.name === "Farbe" && isColorwayCode(aspect.value) && aspect.value.trim() === code,
+  );
 }
 
 export function offerMatches(offer: CatalogOffer, aspects: Record<string, string[]>) {
   return Object.entries(aspects).every(([name, values]) => {
     if (values.length === 0) return true;
+    if (name === COLORWAY_ASPECT) return values.some((value) => colorwayMatches(offer, value));
     return values.some((value) =>
       offer.aspects.some(
-        (aspect) => aspect.name === name && aspectValueMatches(name, aspect.value, value),
+        (aspect) =>
+          aspect.name === name && aspectValueMatches(name, aspect.value, value, offer.title),
       ),
     );
   });

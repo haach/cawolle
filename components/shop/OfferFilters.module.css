@@ -146,6 +146,20 @@
   border-radius: 2px;
 }
 
+.colorwayItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  grid-column: 1 / -1;
+}
+
+.colorwayHeading {
+  color: var(--color-text-high-contrast);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+  padding: 3px 0;
+}
+
 .values.stack {
   display: flex;
   flex-direction: column;

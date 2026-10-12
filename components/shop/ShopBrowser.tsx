@@ -12,7 +12,7 @@ type ShopBrowserProps = {
 };
 
 export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
-  const { query, selected, aspects, visible, setQuery, toggleAspect, resetFilters } =
+  const { query, selected, aspects, visible, setQuery, toggleAspect, setColorway, resetFilters } =
     useOfferFilters(offers);
 
   if (offers.length === 0) {
@@ -26,6 +26,7 @@ export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
           aspects={aspects}
           selected={selected}
           onToggle={toggleAspect}
+          onColorway={setColorway}
           onReset={resetFilters}
         />
       )}

@@ -6,6 +6,7 @@ import {
   matchesQuery,
   offerMatches,
   parseAspectParams,
+  withColorway,
   withQuery,
   withToggledAspect,
   withoutAspects,
@@ -31,7 +32,8 @@ export function useOfferFilters(offers: CatalogOffer[]) {
   const setQuery = (value: string) => replace(withQuery(searchParams, value));
   const toggleAspect = (name: string, value: string) =>
     replace(withToggledAspect(searchParams, name, value));
+  const setColorway = (value: string) => replace(withColorway(searchParams, value));
   const resetFilters = () => replace(withoutAspects(searchParams));
 
-  return { query, selected, aspects, visible, setQuery, toggleAspect, resetFilters };
+  return { query, selected, aspects, visible, setQuery, toggleAspect, setColorway, resetFilters };
 }

@@ -1,5 +1,5 @@
 import { useCallback, useId, useRef, useState, type FC } from "react";
-import type { AspectRefinement } from "@/lib/shop";
+import { COLORWAY_ASPECT, type AspectRefinement } from "@/lib/shop";
 import { AspectFilters } from "./AspectFilters";
 import { useDialog } from "./useDialog";
 import styles from "./OfferFilters.module.css";
@@ -9,10 +9,17 @@ type OfferFiltersProps = {
   aspects: AspectRefinement[];
   selected: Record<string, string[]>;
   onToggle: (name: string, value: string) => void;
+  onColorway: (value: string) => void;
   onReset: () => void;
 };
 
-export const OfferFilters: FC<OfferFiltersProps> = ({ aspects, selected, onToggle, onReset }) => {
+export const OfferFilters: FC<OfferFiltersProps> = ({
+  aspects,
+  selected,
+  onToggle,
+  onColorway,
+  onReset,
+}) => {
   const panelId = useId();
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -72,7 +79,13 @@ export const OfferFilters: FC<OfferFiltersProps> = ({ aspects, selected, onToggl
           </button>
         </div>
         <div className={styles.drawerBody}>
-          <AspectFilters aspects={aspects} selected={selected} onToggle={onToggle} />
+          <AspectFilters
+            aspects={aspects}
+            selected={selected}
+            colorway={selected[COLORWAY_ASPECT]?.[0] ?? ""}
+            onToggle={onToggle}
+            onColorway={onColorway}
+          />
         </div>
         <div className={styles.drawerFooter}>
           <button type="button" className={styles.done} onClick={close}>
