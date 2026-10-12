@@ -136,11 +136,22 @@ const WeightGroup: FC<WeightGroupProps> = ({ aspectName, entry, selected, onTogg
 };
 
 type ColorwayGroupProps = {
+  aspectName: string;
+  entry: AspectValue;
+  selected: string[];
   colorway: string;
+  onToggle: (name: string, value: string) => void;
   onColorway: (value: string) => void;
 };
 
-const ColorwayGroup: FC<ColorwayGroupProps> = ({ colorway, onColorway }) => {
+const ColorwayGroup: FC<ColorwayGroupProps> = ({
+  aspectName,
+  entry,
+  selected,
+  colorway,
+  onToggle,
+  onColorway,
+}) => {
   const panelId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const [explicitOpen, setExplicitOpen] = useState<boolean | null>(null);
@@ -153,27 +164,35 @@ const ColorwayGroup: FC<ColorwayGroupProps> = ({ colorway, onColorway }) => {
   return (
     <li className={styles.colorwayItem}>
       <Spacing dir="row" space={5}>
-        <span className={styles.colorwayHeading}>{COLORWAY_ASPECT}</span>
+        <FilterOption
+          checked={selected.includes(entry.value)}
+          text={entry.label ?? entry.value}
+          count={entry.count}
+          swatch={FARBE_SWATCHES[entry.value]}
+          onToggle={() => onToggle(aspectName, entry.value)}
+        />
         <Disclosure
           open={open}
           panelId={panelId}
-          label={COLORWAY_ASPECT}
+          label={entry.value}
           onClick={() => setExplicitOpen(!open)}
         />
       </Spacing>
       {open && (
-        <div id={panelId} ref={panelRef} className={styles.lengths}>
-          <input
-            className={styles.control}
-            type="text"
-            inputMode="numeric"
-            autoComplete="off"
-            name="colorway"
-            aria-label={COLORWAY_ASPECT}
-            value={colorway}
-            placeholder="z. B. 580"
-            onChange={(event) => onColorway(event.target.value)}
-          />
+        <div id={panelId} ref={panelRef} className={styles.colorwayPanel}>
+          <label className={styles.colorwayField}>
+            <span className={styles.colorwayLabel}>{COLORWAY_ASPECT}</span>
+            <input
+              className={styles.control}
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              name="colorway"
+              value={colorway}
+              placeholder="z. B. 580"
+              onChange={(event) => onColorway(event.target.value)}
+            />
+          </label>
         </div>
       )}
     </li>
@@ -224,17 +243,15 @@ export const AspectFilters: FC<AspectFiltersProps> = ({
               ),
             )}
             {farbverlauf && (
-              <li className={styles.colorwayItem}>
-                <FilterOption
-                  checked={chosen.includes(farbverlauf.value)}
-                  text={farbverlauf.label ?? farbverlauf.value}
-                  count={farbverlauf.count}
-                  swatch={FARBE_SWATCHES[farbverlauf.value]}
-                  onToggle={() => onToggle(aspect.name, farbverlauf.value)}
-                />
-              </li>
+              <ColorwayGroup
+                aspectName={aspect.name}
+                entry={farbverlauf}
+                selected={chosen}
+                colorway={colorway}
+                onToggle={onToggle}
+                onColorway={onColorway}
+              />
             )}
-            {farbverlauf && <ColorwayGroup colorway={colorway} onColorway={onColorway} />}
           </ul>
         </fieldset>
       );
