@@ -12,8 +12,17 @@ type ShopBrowserProps = {
 };
 
 export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
-  const { query, selected, aspects, visible, setQuery, toggleAspect, setColorway, resetFilters } =
-    useOfferFilters(offers);
+  const {
+    query,
+    filterQuery,
+    selected,
+    aspects,
+    visible,
+    setQuery,
+    toggleAspect,
+    setColorway,
+    resetFilters,
+  } = useOfferFilters(offers);
 
   if (offers.length === 0) {
     return <p className={styles.status}>Der Shop-Katalog ist noch leer.</p>;
@@ -48,7 +57,7 @@ export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
             <p className={styles.count}>
               {visible.length === 1 ? "1 Angebot" : `${visible.length} Angebote`}
             </p>
-            <OfferList offers={visible} />
+            <OfferList offers={visible} filterQuery={filterQuery} />
           </>
         )}
       </div>

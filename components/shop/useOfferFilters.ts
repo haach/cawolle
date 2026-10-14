@@ -6,6 +6,7 @@ import {
   matchesQuery,
   offerMatches,
   parseAspectParams,
+  shopFilterQuery,
   withColorway,
   withQuery,
   withToggledAspect,
@@ -18,6 +19,7 @@ export function useOfferFilters(offers: CatalogOffer[]) {
   const pathname = usePathname();
   const router = useRouter();
   const query = searchParams.get("q") ?? "";
+  const filterQuery = shopFilterQuery(searchParams);
   const selected = parseAspectParams(searchParams);
   const aspects = aspectRefinements(offers);
   const visible = offers.filter(
@@ -35,5 +37,15 @@ export function useOfferFilters(offers: CatalogOffer[]) {
   const setColorway = (value: string) => replace(withColorway(searchParams, value));
   const resetFilters = () => replace(withoutAspects(searchParams));
 
-  return { query, selected, aspects, visible, setQuery, toggleAspect, setColorway, resetFilters };
+  return {
+    query,
+    filterQuery,
+    selected,
+    aspects,
+    visible,
+    setQuery,
+    toggleAspect,
+    setColorway,
+    resetFilters,
+  };
 }

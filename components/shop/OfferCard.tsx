@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { OfferTeaser } from "@/lib/shop";
+import { withFilterQuery, type OfferTeaser } from "@/lib/shop";
 import { FramedPhoto } from "./FramedPhoto";
 import { OfferMeta } from "./OfferMeta";
 import styles from "./OfferCard.module.css";
@@ -7,10 +7,14 @@ import Link from "next/link";
 
 type OfferCardProps = {
   offer: OfferTeaser;
+  filterQuery: string;
 };
 
-export const OfferCard: FC<OfferCardProps> = ({ offer }) => (
-  <Link href={`/shop/${encodeURIComponent(offer.id)}`} className={styles.card}>
+export const OfferCard: FC<OfferCardProps> = ({ offer, filterQuery }) => (
+  <Link
+    href={withFilterQuery(`/shop/${encodeURIComponent(offer.id)}`, filterQuery)}
+    className={styles.card}
+  >
     <span className={styles.media}>
       {offer.imageUrl ? (
         <FramedPhoto src={offer.imageUrl} alt="" sizes="(max-width: 560px) 100vw, 360px" />

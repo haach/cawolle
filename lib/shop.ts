@@ -100,6 +100,23 @@ export function withQuery(params: URLSearchParams, value: string) {
   return next;
 }
 
+type ShopFilterParams = {
+  get(name: string): string | null;
+  getAll(name: string): string[];
+};
+
+export function shopFilterQuery(params: ShopFilterParams) {
+  const next = new URLSearchParams();
+  const query = params.get("q");
+  if (query) next.set("q", query);
+  for (const value of params.getAll("aspect")) next.append("aspect", value);
+  return next.toString();
+}
+
+export function withFilterQuery(path: string, query: string) {
+  return query ? `${path}?${query}` : path;
+}
+
 export function withoutAspects(params: URLSearchParams) {
   const next = new URLSearchParams(params);
   next.delete("aspect");

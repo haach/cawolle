@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button, Typography } from "@/components/atoms";
 import { JsonLd } from "@/components/JsonLd";
 import { PhotoGallery } from "@/components/shop/PhotoGallery";
 import { OfferMeta } from "@/components/shop/OfferMeta";
+import { ShopBackLink } from "@/components/shop/ShopBackLink";
 import { readCatalog, readOffer } from "@/lib/catalog";
 import { shareMetadata } from "@/lib/metadata";
 import { breadcrumb, offerDescription, product } from "@/lib/schema";
@@ -56,9 +58,15 @@ export default async function OfferPage({ params }: OfferPageProps) {
           ]),
         ]}
       />
-      <Link href="/shop" className={styles.back}>
-        Zurück zum Shop
-      </Link>
+      <Suspense
+        fallback={
+          <Link href="/shop" className={styles.back}>
+            Zurück zum Shop
+          </Link>
+        }
+      >
+        <ShopBackLink className={styles.back} />
+      </Suspense>
       <div className={styles.layout}>
         <PhotoGallery images={offer.images} title={offer.title} />
         <div className={styles.summary}>
