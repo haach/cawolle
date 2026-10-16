@@ -6,41 +6,48 @@ import styles from "./Button.module.css";
 
 type Variant = "solid" | "pill";
 
-type ButtonProps = {
+type SharedProps = {
   variant?: Variant;
   href?: string;
-  children: ReactNode;
-} & Omit<ComponentProps<"button">, "children">;
+} & Omit<ComponentProps<"button">, "children" | "aria-label">;
+
+type ButtonProps = SharedProps &
+  (
+    | { icon: ReactNode; children?: never; "aria-label": string }
+    | { icon?: undefined; children: ReactNode; "aria-label"?: string }
+  );
 
 export const Button: FC<ButtonProps> = ({
   variant = "pill",
   href,
   className,
+  icon,
   children,
   type = "button",
   ...props
 }) => {
-  const classes = cn(styles.button, styles[variant], className);
+  const classes = cn(styles.button, styles[variant], icon ? styles.icon : false, className);
+  const content = icon ?? children;
 
   if (href) {
     if (href.startsWith("http://") || href.startsWith("https://")) {
       return (
         <ExternalLink href={href} className={classes}>
-          {children}
+          {content}
         </ExternalLink>
       );
     }
 
     return (
       <Link href={href} className={classes}>
-        {children}
+        {content}
       </Link>
     );
   }
 
   return (
     <button type={type} className={classes} {...props}>
-      {children}
+      {content}
     </button>
   );
 };

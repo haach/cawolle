@@ -59,6 +59,59 @@
   color: var(--color-error-intense);
 }
 
+.listPane {
+  min-width: 0;
+}
+
+.toTop {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-60);
+  padding-bottom: var(--space-20);
+}
+
+@media (min-width: 801px) {
+  :global(html):has(.layout),
+  :global(body):has(.layout) {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  :global(main):has(.layout) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .layout {
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  .layout > :not(.results) {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: var(--space-10);
+  }
+
+  .results {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .listPane {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
 @media (max-width: 800px) {
   .layout:has(aside) {
     grid-template-columns: 1fr;
