@@ -2,6 +2,7 @@
 
 import type { FC } from "react";
 import type { CatalogOffer } from "@/lib/shop";
+import { EmptyOffers } from "./EmptyOffers";
 import { OfferFilters } from "./OfferFilters";
 import { OfferList } from "./OfferList";
 import { useOfferFilters } from "./useOfferFilters";
@@ -22,6 +23,7 @@ export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
     toggleAspect,
     setColorway,
     resetFilters,
+    clearSelection,
   } = useOfferFilters(offers);
 
   if (offers.length === 0) {
@@ -51,7 +53,7 @@ export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
             onChange={(event) => setQuery(event.target.value)}
           />
         </label>
-        {visible.length === 0 && <p className={styles.status}>Keine Angebote für diese Auswahl.</p>}
+        {visible.length === 0 && <EmptyOffers onClear={clearSelection} />}
         {visible.length > 0 && (
           <>
             <p className={styles.count}>

@@ -1,0 +1,92 @@
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-20);
+  padding: var(--space-30) var(--space-20) var(--space-40);
+  border: 1px solid var(--color-tan-hover);
+  border-radius: var(--radius-sm);
+  background:
+    radial-gradient(circle at 50% 42%, var(--color-input), transparent 42%),
+    var(--color-background);
+  text-align: center;
+}
+
+.art {
+  width: min(100%, 320px);
+  height: auto;
+}
+
+.stage {
+  fill: var(--color-input);
+}
+
+.shadow,
+.hollow {
+  fill: var(--color-beige);
+}
+
+.basket {
+  fill: var(--color-tan-hover);
+}
+
+.rim {
+  fill: var(--color-input);
+  stroke: var(--color-tan);
+  stroke-width: 2.5;
+}
+
+.weave {
+  fill: none;
+  stroke: var(--color-tan);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.yarn,
+.strand,
+.strandEnd {
+  fill: var(--color-brand);
+}
+
+.highlight {
+  fill: var(--color-brand-active);
+  opacity: 0.7;
+}
+
+.wrap {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.wrapTan {
+  stroke: var(--color-tan);
+}
+
+.wrapLight {
+  stroke: var(--color-tan-hover);
+}
+
+.wrapCream {
+  stroke: var(--color-beige);
+}
+
+.wrapDeep {
+  stroke: var(--color-brand-dark);
+  opacity: 0.45;
+}
+
+.strand {
+  fill: none;
+  stroke: var(--color-brand);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  max-width: 28rem;
+}

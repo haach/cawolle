@@ -36,6 +36,11 @@ export function useOfferFilters(offers: CatalogOffer[]) {
     replace(withToggledAspect(searchParams, name, value));
   const setColorway = (value: string) => replace(withColorway(searchParams, value));
   const resetFilters = () => replace(withoutAspects(searchParams));
+  const clearSelection = () => {
+    const next = withoutAspects(searchParams);
+    next.delete("q");
+    replace(next);
+  };
 
   return {
     query,
@@ -47,5 +52,6 @@ export function useOfferFilters(offers: CatalogOffer[]) {
     toggleAspect,
     setColorway,
     resetFilters,
+    clearSelection,
   };
 }
