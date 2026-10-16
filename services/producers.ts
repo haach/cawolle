@@ -60,3 +60,15 @@ export const producers = [
     category: "kurzwaren",
   },
 ] as const;
+
+function brandName(name: string) {
+  return name.replace(/\s+/g, " ").trim();
+}
+
+export function producerLogo(name: string) {
+  const brand = brandName(name);
+  return producers.find(
+    (producer) =>
+      brandName(producer.name).localeCompare(brand, "de", { sensitivity: "base" }) === 0,
+  )?.logo;
+}

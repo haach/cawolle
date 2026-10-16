@@ -1,5 +1,7 @@
+import Image from "next/image";
 import { useEffect, useId, useRef, useState, type FC } from "react";
 import { COLORWAY_ASPECT, FARBVERLAUF, type AspectRefinement, type AspectValue } from "@/lib/shop";
+import { producerLogo } from "@/services/producers";
 import styles from "./OfferFilters.module.css";
 import { Spacing } from "../atoms/Spacing";
 
@@ -46,19 +48,25 @@ type FilterOptionProps = {
   text: string;
   count: number;
   swatch?: string;
+  logo?: string;
   onToggle: () => void;
 };
 
-const FilterOption: FC<FilterOptionProps> = ({ checked, text, count, swatch, onToggle }) => (
-  <label className={styles.option}>
+const FilterOption: FC<FilterOptionProps> = ({ checked, text, count, swatch, logo, onToggle }) => (
+  <label className={logo ? `${styles.option} ${styles.brand}` : styles.option}>
     <input type="checkbox" checked={checked} onChange={onToggle} />
-    <span>
-      {text}
-      {swatch ? (
-        <span className={styles.swatch} style={{ background: swatch }} aria-hidden="true" />
-      ) : null}{" "}
-      ({count})
-    </span>
+    {logo ? (
+      <Image src={logo} alt={text} width={160} height={91} className={styles.brandLogo} />
+    ) : (
+      <span>
+        {text}
+        {swatch ? (
+          <span className={styles.swatch} style={{ background: swatch }} aria-hidden="true" />
+        ) : null}{" "}
+        ({count})
+      </span>
+    )}
+    {logo ? <span className={styles.brandCount}>({count})</span> : null}
   </label>
 );
 
@@ -237,6 +245,7 @@ export const AspectFilters: FC<AspectFiltersProps> = ({
                     text={entry.label ?? entry.value}
                     count={entry.count}
                     swatch={aspect.name === "Farbe" ? FARBE_SWATCHES[entry.value] : undefined}
+                    logo={aspect.name === "Marke" ? producerLogo(entry.value) : undefined}
                     onToggle={() => onToggle(aspect.name, entry.value)}
                   />
                 </li>

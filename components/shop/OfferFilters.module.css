@@ -136,6 +136,27 @@
   margin-top: 3px;
 }
 
+.brand {
+  align-items: center;
+}
+
+.brand input {
+  margin-top: 0;
+}
+
+.brandLogo {
+  width: auto;
+  height: 2.25rem;
+  max-width: 8.5rem;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brandCount {
+  flex: none;
+  color: var(--color-text-high-contrast);
+}
+
 .swatch {
   display: inline-block;
   width: 0.8em;
