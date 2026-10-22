@@ -7,7 +7,10 @@ function requiredText(message: string, max: number) {
 }
 
 export const contactSchema = z.object({
-  name: requiredText("Bitte geben Sie Ihren Namen ein.", 120),
+  name: requiredText("Bitte geben Sie Ihren Namen ein.", 120).regex(
+    /^[\p{L}\p{M}]+(?:[\p{Zs}'’\u2010\u2011-]+[\p{L}\p{M}]+)*$/u,
+    "Bitte verwenden Sie im Namen nur Buchstaben.",
+  ),
   email: z
     .string()
     .trim()
