@@ -2,7 +2,7 @@
 
 import { contactFieldErrors, contactSchema, readContactForm } from "@/services/contact";
 import type { ContactField, ContactFieldErrors } from "@/services/contact";
-import { sendContactEmail } from "@/services/email";
+import { sanitizeContactMessage, sendContactEmail } from "@/services/email";
 import { siteConfig } from "@/services/site";
 
 export type ContactFormState = {
@@ -33,8 +33,17 @@ export async function sendContactMessage(
     };
   }
 
+  const sanitized = sanitizeContactMessage(parsed.data);
+  if (!sanitized.ok) {
+    return {
+      status: "error",
+      fieldErrors: sanitized.fieldErrors,
+      values: submitted,
+    };
+  }
+
   try {
-    await sendContactEmail(parsed.data);
+    await sendContactEmail(sanitized.value);
   } catch (error) {
     console.error("Contact form email failed", error);
     return {
@@ -43,5 +52,5 @@ export async function sendContactMessage(
     };
   }
 
-  return { status: "success", name: parsed.data.name };
+  return { status: "success", name: sanitized.value.name };
 }

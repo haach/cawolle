@@ -18,9 +18,17 @@ export const contactSchema = z.object({
     .string()
     .trim()
     .min(1, "Bitte geben Sie eine Telefonnummer ein.")
-    .transform((value) => value.replace(/\s+/g, ""))
-    .pipe(z.e164("Bitte geben Sie eine gültige Telefonnummer ein.")),
-  subject: requiredText("Bitte geben Sie einen Betreff ein.", 200),
+    .transform((value) => value.replace(/[\s()./-]/g, ""))
+    .pipe(
+      z
+        .string()
+        .regex(/^\+?\d+$/, "Bitte geben Sie eine gültige Telefonnummer ein.")
+        .max(20, maxLengthMessage(20)),
+    ),
+  subject: requiredText("Bitte geben Sie einen Betreff ein.", 200).regex(
+    /^[\p{L}\p{M}\p{N}\p{Zs}]+$/u,
+    "Bitte verwenden Sie im Betreff nur Buchstaben und Zahlen.",
+  ),
   message: requiredText("Bitte geben Sie eine Nachricht ein.", 5000),
 });
 

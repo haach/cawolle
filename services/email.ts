@@ -1,5 +1,12 @@
 import nodemailer from "nodemailer";
-import type { ContactMessage } from "@/services/contact";
+import sanitizeHtml from "sanitize-html";
+
+import {
+  contactFieldErrors,
+  contactSchema,
+  type ContactFieldErrors,
+  type ContactMessage,
+} from "@/services/contact";
 
 type EmailConfig = {
   host: string;
@@ -54,15 +61,120 @@ function formatSubmittedAt(date: Date): string {
   return `${value("year")}/${value("month")}/${value("day")} - ${value("hour")}:${value("minute")} ${value("dayPeriod")}`;
 }
 
-function singleLine(value: string): string {
+// Removed before sanitize-html runs. A hidden character inside a tag keeps the
+// parser from seeing it, and decoding the escaped result would rebuild the tag.
+// Joiners used by emoji stay in place.
+const HIDDEN_CHARS =
+  /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u00AD\u061C\u180E\u200B\u200E\u200F\u202A-\u202E\u2060-\u206F\uFEFF\uFFF9-\uFFFB\u{E0000}-\u{E007F}]/gu;
+const LINE_BREAKS = /[\r\n\u2028\u2029]+/g;
+
+const plainTextOptions = {
+  allowedTags: [],
+  allowedAttributes: {},
+  disallowedTagsMode: "discard" as const,
+  enforceHtmlBoundary: false,
+};
+
+function characterFromCode(code: number): string {
+  if (!Number.isInteger(code) || code < 0 || code > 0x10ffff) return "";
+  if (code >= 0xd800 && code <= 0xdfff) return "";
+  return String.fromCodePoint(code);
+}
+
+function decodeHtmlEntities(value: string): string {
   return value
-    .replace(/[\r\n\t]+/g, " ")
-    .replace(/\s{2,}/g, " ")
-    .trim();
+    .replace(/&#(\d+);/g, (_, digits: string) => characterFromCode(Number(digits)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => characterFromCode(Number.parseInt(hex, 16)))
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
+}
+
+function stripHidden(value: string): string {
+  return value.replace(HIDDEN_CHARS, "");
+}
+
+function stripMarkup(value: string): string {
+  let current = stripHidden(value);
+
+  for (let pass = 0; pass < 3; pass += 1) {
+    const decoded = stripHidden(decodeHtmlEntities(current));
+    const stripped = sanitizeHtml(decoded, plainTextOptions);
+    const plain = stripHidden(decodeHtmlEntities(stripped));
+
+    if (sanitizeHtml(plain, plainTextOptions) === stripped) return plain;
+
+    current = stripped;
+  }
+
+  return current;
+}
+
+function normalizeText(value: string): string {
+  return value.normalize("NFKC").replace(/\p{Zs}/gu, " ");
+}
+
+function sanitizeHeader(value: string, maxLength: number): string {
+  return stripMarkup(normalizeText(value))
+    .replace(LINE_BREAKS, " ")
+    .replace(HIDDEN_CHARS, "")
+    .replace(/[<>]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function sanitizeBody(value: string, maxLength: number): string {
+  return stripMarkup(normalizeText(value))
+    .replace(/\r\n?/g, "\n")
+    .replace(/[\u2028\u2029]/g, "\n")
+    .replace(HIDDEN_CHARS, "")
+    .replace(/[^\S\n]+/g, " ")
+    .replace(/ *\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function sanitizeMailbox(value: string): string {
+  return normalizeText(value)
+    .replace(HIDDEN_CHARS, "")
+    .replace(LINE_BREAKS, "")
+    .replace(/\s+/g, "")
+    .trim()
+    .slice(0, 254);
+}
+
+function sanitizePhone(value: string): string {
+  return normalizeText(value).replace(/[^\d+]/g, "");
+}
+
+export type SanitizedContact =
+  { ok: true; value: ContactMessage } | { ok: false; fieldErrors: ContactFieldErrors };
+
+export function sanitizeContactMessage(contact: ContactMessage): SanitizedContact {
+  const parsed = contactSchema.safeParse({
+    name: sanitizeHeader(contact.name, 120),
+    email: sanitizeMailbox(contact.email),
+    phone: sanitizePhone(contact.phone),
+    subject: sanitizeHeader(contact.subject, 200),
+    message: sanitizeBody(contact.message, 5000),
+  });
+
+  if (!parsed.success) {
+    return { ok: false, fieldErrors: contactFieldErrors(parsed.error) };
+  }
+
+  return { ok: true, value: parsed.data };
 }
 
 function buildContactEmail(contact: ContactMessage, submittedAt: Date) {
-  const subject = `Neue Nachricht von ${singleLine(contact.name)} on ${formatSubmittedAt(submittedAt)}`;
+  const subject = sanitizeHeader(
+    `Neue Nachricht von ${contact.name} on ${formatSubmittedAt(submittedAt)}`,
+    240,
+  );
   const text = [
     `${contact.name} hat dir eine Nachricht über das Kontaktformular gesendet.`,
     "",
@@ -79,13 +191,21 @@ function buildContactEmail(contact: ContactMessage, submittedAt: Date) {
 }
 
 export async function sendContactEmail(contact: ContactMessage): Promise<void> {
+  const sanitized = sanitizeContactMessage(contact);
+  if (!sanitized.ok) {
+    throw new Error("Contact message failed sanitization.");
+  }
+
   const emailConfig = readEmailConfig();
-  const email = buildContactEmail(contact, new Date());
+  const safe = sanitized.value;
+  const email = buildContactEmail(safe, new Date());
 
   const transporter = nodemailer.createTransport({
     host: emailConfig.host,
     port: emailConfig.port,
     secure: emailConfig.port === 465,
+    disableFileAccess: true,
+    disableUrlAccess: true,
     auth: {
       user: emailConfig.user,
       pass: emailConfig.pass,
@@ -95,9 +215,11 @@ export async function sendContactEmail(contact: ContactMessage): Promise<void> {
   const info = await transporter.sendMail({
     from: emailConfig.fromEmail,
     to: emailConfig.toEmail,
-    replyTo: contact.email,
+    replyTo: safe.email,
     subject: email.subject,
     text: email.text,
+    disableFileAccess: true,
+    disableUrlAccess: true,
   });
 
   if (!info.messageId) {
