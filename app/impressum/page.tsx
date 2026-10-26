@@ -26,6 +26,10 @@ export default function ImpressumPage() {
         </Typography>
       </div>
       <div>
+        <Typography variant="h2">USt-Id</Typography>
+        <Typography variant="body">DE281549333</Typography>
+      </div>
+      <div>
         <Typography variant="h2">Bankverbindung</Typography>
         <Typography variant="body">IBAN: DE 73 5059 2200 0006 0364 65</Typography>
       </div>
