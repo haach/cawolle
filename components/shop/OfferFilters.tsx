@@ -47,7 +47,7 @@ export const OfferFilters: FC<OfferFiltersProps> = ({
           onClick={onReset}
           disabled={activeCount === 0}
         >
-          Alle filter zurücksetzen
+          Alle Filter zurücksetzen
         </button>
       </div>
       <button

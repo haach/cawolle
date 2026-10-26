@@ -1,4 +1,5 @@
 .spacing {
+  width: 100%;
   display: flex;
   gap: var(--spacing);
 }

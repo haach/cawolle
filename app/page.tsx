@@ -1,3 +1,4 @@
+import { Discover } from "@/components/Discover";
 import { Hero } from "@/components/Hero";
 import { JsonLd } from "@/components/JsonLd";
 import { MoodBand } from "@/components/MoodBand";
@@ -18,6 +19,7 @@ export default function HomePage() {
     <div className={styles.page}>
       <JsonLd data={[organization(), website()]} />
       <Hero />
+      <Discover />
       <OnlineShop />
       <MoodBand
         image="/mood/werke.jpg"

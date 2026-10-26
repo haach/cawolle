@@ -1,18 +1,26 @@
+import Link from "next/link";
 import { useId, type FC } from "react";
-import { Button, Typography } from "../atoms";
+import { Button, Spacing, Typography } from "../atoms";
 import styles from "./EmptyOffers.module.css";
 
 type EmptyOffersProps = {
   onClear: () => void;
+  alternative?: { href: string; label: string };
 };
 
-export const EmptyOffers: FC<EmptyOffersProps> = ({ onClear }) => {
+export const EmptyOffers: FC<EmptyOffersProps> = ({ onClear, alternative }) => {
   const rawId = useId().replaceAll(":", "");
   const basketClipId = `empty-basket-${rawId}`;
   const yarnClipId = `empty-yarn-${rawId}`;
 
   return (
-    <div className={styles.empty} aria-live="polite" aria-atomic="true">
+    <Spacing
+      space={20}
+      alignItems="center"
+      className={styles.empty}
+      aria-live="polite"
+      aria-atomic={true}
+    >
       <svg className={styles.art} viewBox="0 0 320 200" fill="none" aria-hidden="true">
         <circle className={styles.stage} cx="160" cy="100" r="88" />
         <ellipse className={styles.shadow} cx="176" cy="174" rx="74" ry="8" />
@@ -47,13 +55,14 @@ export const EmptyOffers: FC<EmptyOffersProps> = ({ onClear }) => {
           </clipPath>
         </defs>
       </svg>
-      <div className={styles.copy}>
+      <Spacing space={10} alignItems="stretch" className={styles.copy}>
         <Typography variant="h3" as="p">
           Keine Angebote für diese Auswahl.
         </Typography>
         <Typography variant="body">Passen Sie die Filter oder den Suchbegriff an.</Typography>
-      </div>
+      </Spacing>
       <Button onClick={onClear}>Auswahl zurücksetzen</Button>
-    </div>
+      {alternative && <Link href={alternative.href}>{alternative.label}</Link>}
+    </Spacing>
   );
 };

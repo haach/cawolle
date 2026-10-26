@@ -8,6 +8,7 @@
     "prebuild": "node --env-file-if-exists=.env --import tsx scripts/sync-shop.ts",
     "build": "next build",
     "start": "next start",
+    "test": "node --import tsx --test lib/**/*.test.ts",
     "lint": "eslint",
     "spell": "cspell --no-progress .",
     "format": "prettier --write .",

@@ -9,13 +9,34 @@ type SpacingProps = {
   dir?: "col" | "row";
   children: ReactNode;
   className?: string;
+  alignItems?: "start" | "center" | "end" | "stretch";
+  justifyContent?: "start" | "center" | "end";
+  "aria-live"?: "polite" | "assertive" | "off";
+  "aria-atomic"?: boolean;
 };
 
-export const Spacing: FC<SpacingProps> = ({ space = 30, dir = "col", children, className }) => {
+export const Spacing: FC<SpacingProps> = ({
+  space = 30,
+  dir = "col",
+  children,
+  className,
+  alignItems = "start",
+  justifyContent = "start",
+  "aria-live": ariaLive,
+  "aria-atomic": ariaAtomic,
+}) => {
   return (
     <div
       className={cn(styles.spacing, styles[dir], className)}
-      style={{ "--spacing": `var(--space-${space})` } as CSSProperties}
+      aria-live={ariaLive}
+      aria-atomic={ariaAtomic}
+      style={
+        {
+          "--spacing": `var(--space-${space})`,
+          alignItems: alignItems,
+          justifyContent: justifyContent,
+        } as CSSProperties
+      }
     >
       {children}
     </div>

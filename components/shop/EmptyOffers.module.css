@@ -1,14 +1,9 @@
 .empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-20);
   padding: var(--space-30) var(--space-20) var(--space-40);
   border: 1px solid var(--color-tan-hover);
   border-radius: var(--radius-sm);
   background:
-    radial-gradient(circle at 50% 42%, var(--color-input), transparent 42%),
-    var(--color-background);
+    radial-gradient(circle at 50% 42%, var(--color-input), transparent 42%), var(--color-background);
   text-align: center;
 }
 
@@ -85,8 +80,5 @@
 }
 
 .copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-10);
   max-width: 28rem;
 }

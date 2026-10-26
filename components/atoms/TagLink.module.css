@@ -1,0 +1,26 @@
+.tag {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  background-color: var(--color-text-muted);
+  color: var(--color-on-brand);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1;
+
+  &:hover {
+    color: var(--color-on-brand);
+    background-color: var(--color-text-subtle);
+    transition: background-color 0.3s ease;
+  }
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-10);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

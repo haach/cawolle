@@ -14,19 +14,14 @@
 }
 
 .inner {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-20);
   margin-inline: auto;
 }
 
 .start .inner {
-  align-items: flex-start;
   width: min(100%, var(--page-width));
 }
 
 .center .inner {
-  align-items: center;
   width: min(100%, 42rem);
   text-align: center;
 }

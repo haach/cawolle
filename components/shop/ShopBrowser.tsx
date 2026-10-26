@@ -1,8 +1,10 @@
 "use client";
 
 import { useLayoutEffect, useRef, type FC } from "react";
-import type { CatalogOffer } from "@/lib/shop";
-import { Button } from "../atoms";
+import { canonicalBrand, normalizeOffer, slugify } from "@/lib/normalize";
+import { OTHER_BRAND } from "@/services/producers";
+import { COLORWAY_ASPECT, type CatalogOffer } from "@/lib/shop";
+import { Button, Spacing, Typography } from "../atoms";
 import { EmptyOffers } from "./EmptyOffers";
 import { OfferFilters } from "./OfferFilters";
 import { OfferList } from "./OfferList";
@@ -28,6 +30,8 @@ export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
   } = useOfferFilters(offers);
   const listPaneRef = useRef<HTMLDivElement>(null);
   const aspectKey = aspectSelectionKey(selected);
+  const activeFilters = activeFilterLabels(selected);
+  const alternative = visible.length === 0 ? emptyAlternative(offers, query, selected) : undefined;
   const previousAspects = useRef(aspectKey);
 
   useLayoutEffect(() => {
@@ -56,7 +60,7 @@ export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
   };
 
   if (offers.length === 0) {
-    return <p className={styles.status}>Der Shop-Katalog ist noch leer.</p>;
+    return <Typography className={styles.status}>Der Shop-Katalog ist noch leer.</Typography>;
   }
 
   return (
@@ -70,7 +74,7 @@ export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
           onReset={resetFilters}
         />
       )}
-      <div className={styles.results}>
+      <Spacing space={20} alignItems="stretch" className={styles.results}>
         <label className={styles.search}>
           <span className={styles.label}>Suche</span>
           <input
@@ -82,16 +86,21 @@ export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
             onChange={(event) => setQuery(event.target.value)}
           />
         </label>
-        {visible.length === 0 && <EmptyOffers onClear={clearSelection} />}
+        {activeFilters.length > 0 && (
+          <Typography className={styles.count}>
+            Aktive Filter: {activeFilters.join(", ")}
+          </Typography>
+        )}
+        {visible.length === 0 && <EmptyOffers onClear={clearSelection} alternative={alternative} />}
         {visible.length > 0 && (
           <>
-            <p className={styles.count}>
+            <Typography className={styles.count}>
               {visible.length === 1 ? "1 Angebot" : `${visible.length} Angebote`}
-            </p>
+            </Typography>
             <div className={styles.listPane} ref={listPaneRef}>
               <OfferList offers={visible} filterQuery={filterQuery} />
               {visible.length >= 6 && (
-                <div className={styles.toTop}>
+                <Spacing dir="row" justifyContent="center" className={styles.toTop}>
                   <Button
                     icon={
                       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -108,15 +117,46 @@ export const ShopBrowser: FC<ShopBrowserProps> = ({ offers }) => {
                     onClick={scrollListToTop}
                     aria-label="Zum Anfang der Liste"
                   />
-                </div>
+                </Spacing>
               )}
             </div>
           </>
         )}
-      </div>
+      </Spacing>
     </div>
   );
 };
+
+function activeFilterLabels(selected: Record<string, string[]>) {
+  return Object.entries(selected).flatMap(([name, values]) =>
+    values.map((value) => (name === COLORWAY_ASPECT ? `Farbnummer ${value}` : value)),
+  );
+}
+
+function emptyAlternative(
+  offers: CatalogOffer[],
+  query: string,
+  selected: Record<string, string[]>,
+) {
+  const brands = selected.Marke ?? [];
+  if (brands.length === 1 && brands[0] !== OTHER_BRAND) {
+    const brand = canonicalBrand(brands[0]);
+    return { href: `/marken/${slugify(brand)}`, label: `Alle Angebote von ${brand}` };
+  }
+
+  const digits = query.trim();
+  if (!/^\d+$/.test(digits)) return undefined;
+  const hits = [
+    ...new Set(
+      offers
+        .filter((offer) => normalizeOffer(offer).colorNumber === digits)
+        .map((offer) => normalizeOffer(offer).brand)
+        .filter((brand): brand is string => Boolean(brand)),
+    ),
+  ];
+  if (hits.length !== 1) return undefined;
+  return { href: `/marken/${slugify(hits[0])}`, label: `Farbe ${digits} bei ${hits[0]} ansehen` };
+}
 
 function aspectSelectionKey(selected: Record<string, string[]>) {
   return Object.entries(selected)

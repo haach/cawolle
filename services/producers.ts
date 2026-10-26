@@ -65,10 +65,16 @@ function brandName(name: string) {
   return name.replace(/\s+/g, " ").trim();
 }
 
+export const OTHER_BRAND = "Sonstige";
+
 export function producerLogo(name: string) {
   const brand = brandName(name);
   return producers.find(
     (producer) =>
       brandName(producer.name).localeCompare(brand, "de", { sensitivity: "base" }) === 0,
   )?.logo;
+}
+
+export function listedBrand(name: string) {
+  return producerLogo(name) ? name : OTHER_BRAND;
 }

@@ -22,10 +22,6 @@
 }
 
 .content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-15);
   max-width: 18em;
   text-align: center;
 }

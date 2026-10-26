@@ -6,11 +6,12 @@ type FramedPhotoProps = {
   src: string;
   alt: string;
   sizes: string;
+  preload?: boolean;
 };
 
-export const FramedPhoto: FC<FramedPhotoProps> = ({ src, alt, sizes }) => (
+export const FramedPhoto: FC<FramedPhotoProps> = ({ src, alt, sizes, preload = false }) => (
   <>
     <Image src={src} alt="" fill sizes={sizes} aria-hidden className={styles.backdrop} />
-    <Image src={src} alt={alt} fill sizes={sizes} className={styles.photo} />
+    <Image src={src} alt={alt} fill sizes={sizes} preload={preload} className={styles.photo} />
   </>
 );

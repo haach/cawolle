@@ -13,10 +13,6 @@
   padding-block: var(--space-20);
 }
 
-.copy {
-  margin: 0;
-}
-
 .nav {
   display: flex;
   gap: var(--space-20);

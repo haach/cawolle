@@ -1,9 +1,3 @@
-.gallery {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-15);
-}
-
 .main,
 .thumb {
   position: relative;
@@ -58,9 +52,4 @@
 
 .open:hover {
   color: var(--color-brand-link-hover);
-}
-
-.empty {
-  margin: 0;
-  color: var(--color-text);
 }

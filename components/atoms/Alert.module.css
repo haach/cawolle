@@ -1,14 +1,8 @@
 .alert {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
   margin: 0;
   padding: var(--space-10) var(--space-15);
   border: 1px solid;
   border-radius: var(--radius-sm);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-small);
 }
 
 .error {

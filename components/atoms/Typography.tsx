@@ -36,6 +36,8 @@ type TypographyProps = {
   italic?: boolean;
   children: ReactNode;
   className?: string;
+  id?: string;
+  role?: string;
 };
 
 export const Typography: FC<TypographyProps> = ({
@@ -46,6 +48,8 @@ export const Typography: FC<TypographyProps> = ({
   italic = false,
   children,
   className,
+  id,
+  role,
 }) => {
   const Component = as ?? variantElement[variant];
   const classes = cn(
@@ -57,5 +61,9 @@ export const Typography: FC<TypographyProps> = ({
     className,
   );
 
-  return <Component className={classes}>{children}</Component>;
+  return (
+    <Component className={classes} id={id} role={role}>
+      {children}
+    </Component>
+  );
 };

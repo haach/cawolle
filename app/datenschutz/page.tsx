@@ -11,7 +11,7 @@ export const metadata = shareMetadata({
 
 export default function DatenschutzPage() {
   return (
-    <Spacing>
+    <Spacing alignItems="stretch">
       <Typography variant="h1">Datenschutz</Typography>
       <Typography variant="body">
         Wir verarbeiten personenbezogene Daten nur, soweit das für den Betrieb dieser Website, für
@@ -104,7 +104,8 @@ export default function DatenschutzPage() {
           Cookies gesetzt. Besucher werden nur für einen Tag über einen Hash der Anfrage erkannt,
           nicht über mehrere Tage oder Websites. Erfasst werden die aufgerufene Seite, die
           verweisende Seite, ein ungefährer Standort sowie Gerät und Browser. Diese Angaben liegen
-          uns nur zusammengefasst vor.
+          uns nur zusammengefasst vor. Ein Klick auf den Link zu eBay wird in derselben Auswertung
+          mitgezählt, mit Angebotsnummer, Marke, Seite und, falls vorhanden, dem Suchbegriff.
         </Typography>
         <Typography variant="body">
           Verarbeitet wird das durch die Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723,

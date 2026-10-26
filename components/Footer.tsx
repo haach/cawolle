@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { FC } from "react";
+import { Typography } from "@/components/atoms";
 import { footerNav, siteConfig } from "@/services/site";
 import styles from "./Footer.module.css";
 
 export const Footer: FC = () => (
   <footer className={styles.footer}>
     <div className={styles.inner}>
-      <p className={styles.copy}>{siteConfig.name}</p>
+      <Typography color="muted">{siteConfig.name}</Typography>
       <nav aria-label="Rechtliches">
         <ul className={styles.nav}>
           {footerNav.map((item) => (

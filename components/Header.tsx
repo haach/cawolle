@@ -13,7 +13,6 @@ export const Header: FC = () => (
           alt={siteConfig.name}
           width={647}
           height={280}
-          priority
           className={styles.logo}
         />
       </Link>

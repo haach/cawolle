@@ -12,6 +12,8 @@ export const Hero: FC = () => (
         alt={siteConfig.name}
         width={647}
         height={280}
+        loading="eager"
+        fetchPriority="high"
         className={styles.logo}
       />
     </div>

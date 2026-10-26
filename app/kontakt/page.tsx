@@ -14,7 +14,7 @@ export const metadata = shareMetadata({
 
 export default function KontaktPage() {
   return (
-    <Spacing>
+    <Spacing alignItems="stretch">
       <JsonLd
         data={[
           contactPage(),

@@ -3,7 +3,7 @@ export const siteConfig = {
   owner: "Bettina Achenbach",
   description:
     "Cawolle - ein Online-Wollgeschäft. Garne, Nadeln und Kurzwaren von Katia, Zitron, LANG YARNS, addi und weiteren Manufakturen.",
-  url: "https://cawolle.de",
+  url: "https://www.cawolle.de",
   email: "info@cawolle.de",
   facebook: "https://www.facebook.com/Cawolle/",
   logo: "/logo.png",

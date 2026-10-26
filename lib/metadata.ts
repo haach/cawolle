@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { siteConfig } from "@/services/site";
 
-const homeTitle = `${siteConfig.name} · Online-Wollgeschäft`;
+const homeTitle = `${siteConfig.name} · Wolle und Garn`;
 
 const poster = {
   url: "/og.jpg",
@@ -48,8 +48,11 @@ export function shareMetadata({
 }
 
 export async function rootMetadata(): Promise<Metadata> {
+  const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+
   return {
     metadataBase: await requestMetadataBase(),
+    verification: google ? { google } : undefined,
     title: {
       default: homeTitle,
       template: `%s · ${siteConfig.name}`,
@@ -74,6 +77,8 @@ export async function rootMetadata(): Promise<Metadata> {
 }
 
 async function requestMetadataBase(): Promise<URL> {
+  if (process.env.NODE_ENV === "production") return new URL(siteConfig.url);
+
   const headerList = await headers();
   const host = (headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "")
     .split(",")[0]

@@ -1,33 +1,14 @@
 .form {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-20);
 }
 
 .note {
-  margin: 0;
   text-align: right;
-  color: var(--color-brand);
-  font-size: var(--font-size-small);
-  line-height: var(--line-height-small);
 }
 
 .layout {
   display: grid;
   gap: var(--space-20);
-}
-
-.column {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-20);
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
 }
 
 .label {
@@ -68,10 +49,7 @@
 }
 
 .error {
-  margin: 0;
   color: var(--color-error-intense);
-  font-size: var(--font-size-small);
-  line-height: var(--line-height-small);
 }
 
 .submit {

@@ -13,7 +13,7 @@ export const metadata = shareMetadata({
 
 export default function ImpressumPage() {
   return (
-    <Spacing>
+    <Spacing alignItems="stretch">
       <JsonLd data={organization({ address: true, email: true })} />
       <Typography variant="h1">Impressum</Typography>
       <BusinessAddress />

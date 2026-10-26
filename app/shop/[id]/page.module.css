@@ -1,5 +1,4 @@
 .back {
-  color: var(--color-brand);
   font-size: var(--font-size-form);
 }
 
@@ -9,26 +8,6 @@
   gap: var(--space-40);
   align-items: start;
   margin-top: var(--space-20);
-}
-
-.summary {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-15);
-}
-
-.price {
-  margin: 0;
-  color: var(--color-brand);
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-heading);
-}
-
-.condition {
-  margin: 0;
-  color: var(--color-text);
 }
 
 .aspects {
@@ -62,7 +41,6 @@
 
 .description {
   max-width: 46rem;
-  margin-top: var(--space-40);
   color: var(--color-text-high-contrast);
 }
 
@@ -78,11 +56,21 @@
   color: var(--color-brand);
 }
 
-.fallback {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-15);
+.listingTitle {
+  margin-top: var(--space-30);
+}
+
+.related {
+  margin-top: var(--space-40);
+}
+
+.source {
+  margin-top: var(--space-20);
+}
+
+.source summary {
+  cursor: pointer;
+  color: var(--color-brand);
 }
 
 @media (max-width: 800px) {

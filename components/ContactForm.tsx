@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useActionState, startTransition, type FC, type SubmitEvent } from "react";
 import { useForm, useWatch, type UseFormRegisterReturn } from "react-hook-form";
 import { sendContactMessage, type ContactFormState } from "@/app/kontakt/actions";
-import { Alert, Button } from "@/components/atoms";
+import { Alert, Button, Spacing, Typography } from "@/components/atoms";
 import {
   contactFieldNames,
   contactSchema,
@@ -90,44 +90,48 @@ export const ContactForm: FC = () => {
 
   return (
     <form className={styles.form} action={formAction} onSubmit={onSubmit} noValidate>
-      <p className={styles.note}>* Pflichtfelder</p>
-      {state.status === "error" && state.message && !hasFieldErrors ? (
-        <Alert title="Beim Senden der Nachricht ist ein Fehler aufgetreten." variant="error">
-          {state.message}
-        </Alert>
-      ) : null}
-      <div className={styles.layout}>
-        <div className={styles.column}>
-          {fields.map((field) => (
+      <Spacing space={20} alignItems="stretch">
+        <Typography variant="small" color="brand" className={styles.note}>
+          * Pflichtfelder
+        </Typography>
+        {state.status === "error" && state.message && !hasFieldErrors ? (
+          <Alert title="Beim Senden der Nachricht ist ein Fehler aufgetreten." variant="error">
+            {state.message}
+          </Alert>
+        ) : null}
+        <div className={styles.layout}>
+          <Spacing space={20} alignItems="stretch">
+            {fields.map((field) => (
+              <Field
+                key={field.name}
+                id={field.name}
+                label={field.label}
+                placeholder={field.placeholder}
+                type={field.type}
+                error={messageFor(field.name)}
+                autoComplete={field.autoComplete}
+                registration={register(field.name)}
+              />
+            ))}
+          </Spacing>
+          <Spacing space={20} alignItems="stretch">
             <Field
-              key={field.name}
-              id={field.name}
-              label={field.label}
-              placeholder={field.placeholder}
-              type={field.type}
-              error={messageFor(field.name)}
-              autoComplete={field.autoComplete}
-              registration={register(field.name)}
+              id="message"
+              label="Ihre Nachricht"
+              placeholder="Ihre Nachricht"
+              error={messageFor("message")}
+              registration={register("message")}
+              multiline
             />
-          ))}
+            <Button className={styles.submit} type="submit" disabled={pending}>
+              {pending ? "Wird gesendet…" : "Nachricht senden"}
+            </Button>
+          </Spacing>
         </div>
-        <div className={styles.column}>
-          <Field
-            id="message"
-            label="Ihre Nachricht"
-            placeholder="Ihre Nachricht"
-            error={messageFor("message")}
-            registration={register("message")}
-            multiline
-          />
-          <Button className={styles.submit} type="submit" disabled={pending}>
-            {pending ? "Wird gesendet…" : "Nachricht senden"}
-          </Button>
+        <div className={styles.honeypot} aria-hidden="true">
+          <input id="hp_field" name="hp_field" type="text" tabIndex={-1} autoComplete="off" />
         </div>
-      </div>
-      <div className={styles.honeypot} aria-hidden="true">
-        <input id="hp_field" name="hp_field" type="text" tabIndex={-1} autoComplete="off" />
-      </div>
+      </Spacing>
     </form>
   );
 };
@@ -180,7 +184,7 @@ const Field: FC<FieldProps> = ({
   };
 
   return (
-    <div className={styles.field}>
+    <Spacing space={5} alignItems="stretch">
       <label className={styles.label} htmlFor={id}>
         {label} <span aria-hidden="true">*</span>
       </label>
@@ -190,10 +194,10 @@ const Field: FC<FieldProps> = ({
         <input {...controlProps} type={type} autoComplete={autoComplete} />
       )}
       {error ? (
-        <p className={styles.error} id={errorId} role="alert">
+        <Typography variant="small" id={errorId} role="alert" className={styles.error}>
           {error}
-        </p>
+        </Typography>
       ) : null}
-    </div>
+    </Spacing>
   );
 };

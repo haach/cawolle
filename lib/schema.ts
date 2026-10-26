@@ -9,6 +9,7 @@ import type {
   WebSite,
   WithContext,
 } from "schema-dts";
+import { pageTitle, type NormalizedOffer } from "@/lib/normalize";
 import type { OfferDetail } from "@/lib/shop";
 import { siteConfig } from "@/services/site";
 
@@ -72,12 +73,24 @@ export function breadcrumb(items: { name: string; path: string }[]): WithContext
 }
 
 export function shopPage(): WithContext<CollectionPage> {
+  return collectionPage({
+    name: "Wolle und Garn",
+    path: "/shop",
+    description: siteConfig.shopDescription,
+  });
+}
+
+export function collectionPage(page: {
+  name: string;
+  path: string;
+  description: string;
+}): WithContext<CollectionPage> {
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Shop",
-    url: absoluteUrl("/shop"),
-    description: siteConfig.shopDescription,
+    name: page.name,
+    url: absoluteUrl(page.path),
+    description: page.description,
     inLanguage: "de",
     isPartOf: { "@id": `${siteConfig.url}/#website` },
   };
@@ -126,35 +139,66 @@ function plainText(html: string) {
     .trim();
 }
 
-export function product(offer: OfferDetail): WithContext<Product> | null {
-  if (!offer.priceValue || !offer.priceCurrency) return null;
+function productColor(productFacts: NormalizedOffer) {
+  if (productFacts.colorConflict) return undefined;
+  if (productFacts.colorGroups.length > 1) return productFacts.colorGroups.join(" / ");
+  if (productFacts.colorDescription) return productFacts.colorDescription;
+  if (productFacts.colorGroups.length === 1) return productFacts.colorGroups[0];
+  return undefined;
+}
 
+export function product(offer: OfferDetail, productFacts: NormalizedOffer): WithContext<Product> {
   const pageUrl = absoluteUrl(`/shop/${encodeURIComponent(offer.id)}`);
-  const brand = offer.aspects.find(
-    (aspect) => aspect.name.localeCompare("Marke", "de", { sensitivity: "base" }) === 0,
-  );
   const description = plainText(offer.descriptionHtml);
   const condition = itemCondition(offer.condition);
-  const sale: Offer = {
-    "@type": "Offer",
-    url: offer.itemWebUrl ?? pageUrl,
-    price: offer.priceValue,
-    priceCurrency: offer.priceCurrency,
-    availability: "https://schema.org/InStock",
-    seller: { "@id": organizationId },
-  };
-  if (condition) sale.itemCondition = condition;
+  const properties = [
+    productFacts.colorNumber
+      ? {
+          "@type": "PropertyValue" as const,
+          name: "Herstellerfarbnummer",
+          value: productFacts.colorNumber,
+        }
+      : null,
+    productFacts.titleColor
+      ? {
+          "@type": "PropertyValue" as const,
+          name: "Farbe im Titel",
+          value: productFacts.titleColor,
+        }
+      : null,
+    productFacts.aspectColor
+      ? {
+          "@type": "PropertyValue" as const,
+          name: "Farbe bei eBay",
+          value: productFacts.aspectColor,
+        }
+      : null,
+  ].filter((entry) => entry !== null);
 
-  return {
+  const node: WithContext<Product> = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: offer.title,
+    name: pageTitle(productFacts),
     url: pageUrl,
     image: offer.images.length > 0 ? offer.images : undefined,
     description: description || offer.title,
-    brand: brand ? { "@type": "Brand", name: brand.value } : undefined,
-    offers: sale,
+    brand: productFacts.brand ? { "@type": "Brand", name: productFacts.brand } : undefined,
+    color: productColor(productFacts),
+    additionalProperty: properties.length > 0 ? properties : undefined,
   };
+
+  if (offer.priceValue && offer.priceCurrency && offer.itemWebUrl) {
+    const sale: Offer = {
+      "@type": "Offer",
+      url: offer.itemWebUrl,
+      price: offer.priceValue,
+      priceCurrency: offer.priceCurrency,
+    };
+    if (condition) sale.itemCondition = condition;
+    node.offers = sale;
+  }
+
+  return node;
 }
 
 export type SchemaNode = WithContext<Thing> | WithContext<Thing>[];

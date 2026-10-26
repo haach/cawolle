@@ -1,10 +1,10 @@
 import type { FC } from "react";
-import type { OfferTeaser } from "@/lib/shop";
+import type { CatalogOffer } from "@/lib/shop";
 import { OfferCard } from "./OfferCard";
 import styles from "./OfferList.module.css";
 
 type OfferListProps = {
-  offers: OfferTeaser[];
+  offers: CatalogOffer[];
   filterQuery: string;
 };
 

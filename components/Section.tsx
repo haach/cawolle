@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from "react";
-import { Typography } from "@/components/atoms";
+import { Spacing, Typography } from "@/components/atoms";
 import { cn } from "@/lib/cn";
 import styles from "./Section.module.css";
 
@@ -29,11 +29,15 @@ export const Section: FC<SectionProps> = ({
 
   return (
     <section id={id} className={className} data-tone={tone}>
-      <div className={styles.inner}>
+      <Spacing
+        space={20}
+        alignItems={align === "center" ? "center" : "start"}
+        className={styles.inner}
+      >
         <Typography variant={heading}>{title}</Typography>
         <hr className={styles.rule} />
         {children}
-      </div>
+      </Spacing>
     </section>
   );
 };

@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { qualityIssues } from "../lib/normalize";
 import { missingOfferFields, type CatalogOffer } from "../lib/shop";
 import { EbayRequestError, listActiveSellerItems, loadSellerOffers } from "../services/ebay-api";
 
@@ -79,15 +80,24 @@ async function main() {
       JSON.stringify(entry.detail),
     );
   }
+  const syncedAt = new Date().toISOString();
+  const issues = offers.flatMap(({ offer, detail }) =>
+    qualityIssues({ ...detail, categoryName: offer.categoryName }),
+  );
   await writeFile(
     path.join(stagingDir, "catalog.json"),
     JSON.stringify({
-      syncedAt: new Date().toISOString(),
+      syncedAt,
       offers: offers.map((entry) => entry.offer),
     }),
   );
+  await writeFile(
+    path.join(stagingDir, "quality-report.json"),
+    JSON.stringify({ generatedAt: syncedAt, issues }, null, 2),
+  );
   await publish(stagingDir);
   console.log(`✅ downloaded ${offers.length} offers from eBay`);
+  console.log(`${issues.length} data-quality notes`);
 
   const incomplete = offers.flatMap(({ detail }) => {
     const missing = missingOfferFields(detail);

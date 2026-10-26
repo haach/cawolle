@@ -1,20 +1,29 @@
 import type { FC } from "react";
+import { Typography } from "@/components/atoms";
 
 type OfferMetaProps = {
   price: string | null;
   condition: string | null;
-  priceClassName: string;
-  conditionClassName: string;
+  priceVariant?: "body" | "h3";
+  conditionVariant?: "body" | "small";
 };
 
 export const OfferMeta: FC<OfferMetaProps> = ({
   price,
   condition,
-  priceClassName,
-  conditionClassName,
+  priceVariant = "body",
+  conditionVariant = "small",
 }) => (
   <>
-    {price ? <span className={priceClassName}>{price}</span> : null}
-    {condition ? <span className={conditionClassName}>{condition}</span> : null}
+    {price ? (
+      <Typography as="span" variant={priceVariant} color="brand" weight="semibold">
+        {price}
+      </Typography>
+    ) : null}
+    {condition ? (
+      <Typography as="span" variant={conditionVariant}>
+        {condition}
+      </Typography>
+    ) : null}
   </>
 );
