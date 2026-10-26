@@ -34,7 +34,7 @@ export default function ImpressumPage() {
         <Typography variant="body">IBAN: DE 73 5059 2200 0006 0364 65</Typography>
       </div>
       <div>
-        <Typography variant="h2">Design</Typography>
+        <Typography variant="h2">Webseiten-Design & Entwicklung</Typography>
         <ExternalLink href="https://iamhanna.de">Hanna Achenbach</ExternalLink>
       </div>
     </Spacing>
