@@ -6,7 +6,7 @@ import { Section } from "@/components/Section";
 import styles from "./OnlineShop.module.css";
 
 export const OnlineShop: FC = () => (
-  <Section title="Das Ladengeschäft" heading="h2" align="center" wide>
+  <Section title="Online Wollgeschäft Cawolle" heading="h1" align="center" wide>
     <div className={styles.split}>
       <Image
         src="/package.png"
@@ -15,17 +15,20 @@ export const OnlineShop: FC = () => (
         height={909}
         className={styles.package}
       />
-      <Spacing space={20}>
+      <Spacing dir="col" space={20}>
         <Typography variant="body">
-          Unser Ladengeschäft in Biebergemünd hat zum Ende des Jahres 2024 geschlossen.
+          Unser Ladengeschäft in Biebergemünd hat zum Ende des Jahres 2024 geschlossen. Cawolle ist
+          jetzt ein reiner Online-Shop: dieselbe Auswahl an Wolle, Garnen und Handarbeitszubehör,
+          bequem nach Hause geliefert.
         </Typography>
         <Typography variant="body">
-          Wenn Sie ein bestimmtes Garn, eine Nadelstärke oder Knöpfe zur Jacke suchen, schreiben Sie
-          uns. Wir helfen gerne bei Material und Modell.
+          Stöbern Sie in unserem <Link href="/shop">Shop</Link>, oder schreiben Sie uns, wenn Sie
+          ein bestimmtes Garn, eine Nadelstärke oder Knöpfe zur Jacke suchen. Wir beraten Sie gerne
+          bei Material und Modell.
         </Typography>
-        <Spacing dir="row" alignItems="center" space={20} className={styles.actions}>
-          <Button href="/kontakt">Frage zum Garn</Button>
-          <Link href="/shop">Alle Angebote</Link>
+        <Spacing dir="row" space={20} alignItems="center">
+          <Button href="/shop">Zum Shop</Button>
+          <Link href="/kontakt">Fragen zum Sortiment</Link>
         </Spacing>
       </Spacing>
     </div>
