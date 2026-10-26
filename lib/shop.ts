@@ -173,6 +173,7 @@ const filterAspectOrder = new Map(FILTER_ASPECTS.map((name, index) => [name, ind
 // Guards are longer color words that only contain a shorter shade by accident: Frost is not Rost, Primrose is not Rose.
 // A bare number is a gradient colorway code, not its own color: 580 joins Farbverlauf, and also every color named in the title segment before that code.
 // A Produktart of Verlaufswolle or Verlaufsgarn joins Farbverlauf as well. The colorway number stays its own filter.
+// Produktart Farbverlaufswolle joins the Farbverlaufsgarn filter.
 export const FARBVERLAUF = "Farbverlauf";
 const GRADIENT_PRODUCT_TYPES = ["verlaufswolle", "verlaufsgarn"];
 const FARBE_GUARDS = ["Frost", "Primrose", "Mediterranean", "Mangold"];
@@ -377,6 +378,7 @@ const ASPECT_GROUPS: Record<string, string[]> = {
     "Sockengarne",
   ],
   Farbe: Object.keys(FARBE_MEMBERS),
+  Produktart: ["Farbverlaufsgarn"],
 };
 
 const ASPECT_ALIASES: Record<string, Record<string, string>> = {
@@ -391,6 +393,9 @@ const ASPECT_ALIASES: Record<string, Record<string, string>> = {
       members.map((member) => [member, group]),
     ),
   ),
+  Produktart: {
+    Farbverlaufswolle: "Farbverlaufsgarn",
+  },
 };
 
 function normalizeLabel(value: string) {
