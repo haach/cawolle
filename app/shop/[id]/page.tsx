@@ -16,6 +16,7 @@ import { displayHeading, factRows, normalizeOffer, pageTitle, variantLabel } fro
 import { breadcrumb, offerDescription, product } from "@/lib/schema";
 import styles from "./page.module.css";
 import { TagLinkList } from "@/components/atoms/TagLink";
+import { FARBE_SWATCHES } from "@/lib/shop";
 
 type OfferPageProps = PageProps<"/shop/[id]">;
 
@@ -114,10 +115,16 @@ export default async function OfferPage({ params }: OfferPageProps) {
           <Spacing space={15} alignItems="stretch">
             <Typography variant="h2">Weitere Farben</Typography>
             <TagLinkList
-              links={colors.map((item) => ({
-                href: `/shop/${encodeURIComponent(item.id)}`,
-                children: variantLabel(normalizeOffer(item)),
-              }))}
+              links={colors.map((item) => {
+                const normalized = normalizeOffer(item);
+                const label = variantLabel(normalized);
+                const color = normalized.colorGroups[0];
+                return {
+                  href: `/shop/${encodeURIComponent(item.id)}`,
+                  children: label,
+                  backgroundColor: color ? FARBE_SWATCHES[color] : undefined,
+                };
+              })}
             />
           </Spacing>
         </section>

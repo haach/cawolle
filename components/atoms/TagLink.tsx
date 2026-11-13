@@ -2,17 +2,17 @@ import Link, { type LinkProps } from "next/link";
 import type { FC, PropsWithChildren } from "react";
 import styles from "./TagLink.module.css";
 
-export const TagLink: FC<PropsWithChildren<LinkProps>> = ({ children, ...linkProps }) => {
+type TagLinkProps = PropsWithChildren<LinkProps> & { backgroundColor?: string };
+
+export const TagLink: FC<TagLinkProps> = ({ children, backgroundColor, ...linkProps }) => {
   return (
-    <Link className={styles.tag} {...linkProps}>
+    <Link className={styles.tag} style={{ backgroundColor }} {...linkProps}>
       {children}
     </Link>
   );
 };
 
-export const TagLinkList: FC<PropsWithChildren<{ links: Array<PropsWithChildren<LinkProps>> }>> = ({
-  links,
-}) => {
+export const TagLinkList: FC<PropsWithChildren<{ links: Array<TagLinkProps> }>> = ({ links }) => {
   return (
     <ul className={styles.links}>
       {links.map((link) => (
